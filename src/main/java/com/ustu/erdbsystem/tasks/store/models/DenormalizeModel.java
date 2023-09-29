@@ -19,8 +19,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Setter
@@ -38,7 +38,7 @@ public class DenormalizeModel {
     @Column(nullable = false, length = 2000)
     private String view;
     @LastModifiedDate
-    private Date updatedAt;
+    private Instant updatedAt;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "model_id", referencedColumnName = "id")

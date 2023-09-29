@@ -23,6 +23,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -45,9 +46,9 @@ public class Task {
     @Column(nullable = false)
     private Complexity complexity;
     @CreatedDate
-    private Date createdAt;
+    private Instant createdAt;
     @LastModifiedDate
-    private Date updatedAt;
+    private Instant updatedAt;
 
     @ManyToOne(
             fetch = FetchType.EAGER,

@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 
+import java.time.Instant;
 import java.util.Date;
 
 @Setter
@@ -30,7 +31,7 @@ public class TaskStudent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @CreatedDate
-    private Date createdAt;
+    private Instant createdAt;
 
     @ManyToOne
     @JoinColumn(name = "student_id")

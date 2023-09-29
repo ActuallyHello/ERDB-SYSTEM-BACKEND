@@ -24,6 +24,7 @@ import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -47,9 +48,9 @@ public class Model {
     @Column(nullable = false)
     private String topic;
     @CreatedDate
-    private Date createdAt;
+    private Instant createdAt;
     @LastModifiedDate
-    private Date updatedAt;
+    private Instant updatedAt;
     @Column(nullable = false)
     private Boolean isTaskResult = false;
 

@@ -17,6 +17,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import java.time.Instant;
 import java.util.Date;
 
 @Setter
@@ -41,9 +42,9 @@ public class User {
     @Column(nullable = false)
     private Boolean isActive = true;
     @CreatedDate
-    private Date createdAt;
+    private Instant createdAt;
     @LastModifiedDate
-    private Date updatedAt;
+    private Instant updatedAt;
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private Person person;
