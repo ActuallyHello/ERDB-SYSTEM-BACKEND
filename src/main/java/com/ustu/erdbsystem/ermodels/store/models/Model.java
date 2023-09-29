@@ -52,6 +52,7 @@ public class Model {
     @LastModifiedDate
     private Instant updatedAt;
     @Column(nullable = false)
+    @Builder.Default
     private Boolean isTaskResult = false;
 
     @OneToMany(
@@ -70,9 +71,6 @@ public class Model {
     )
     private Person person;
 
-    @OneToOne(mappedBy = "model", fetch = FetchType.LAZY)
-    private DenormalizeModel denormalizeModel;
-
     @OneToMany(
             fetch = FetchType.LAZY,
             mappedBy = "model",
@@ -80,7 +78,6 @@ public class Model {
             cascade = CascadeType.ALL
     )
     private List<Result> resultList = new ArrayList<>();
-
 
     @Override
     public boolean equals(Object o) {
