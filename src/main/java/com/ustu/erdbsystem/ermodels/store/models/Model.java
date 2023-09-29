@@ -69,6 +69,7 @@ public class Model {
             fetch = FetchType.LAZY,
             cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}
     )
+    @ToString.Exclude
     private Person person;
 
     @OneToMany(
@@ -77,6 +78,7 @@ public class Model {
             orphanRemoval = true,
             cascade = CascadeType.ALL
     )
+    @ToString.Exclude
     private List<Result> resultList = new ArrayList<>();
 
     @Override
