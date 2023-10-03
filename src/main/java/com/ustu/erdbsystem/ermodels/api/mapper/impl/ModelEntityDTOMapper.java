@@ -1,16 +1,16 @@
-package com.ustu.erdbsystem.ermodels.factory.impl;
+package com.ustu.erdbsystem.ermodels.api.mapper.impl;
 
-import com.ustu.erdbsystem.ermodels.dto.ModelEntityDTO;
-import com.ustu.erdbsystem.ermodels.factory.DTOFactory;
+import com.ustu.erdbsystem.ermodels.api.dto.ModelEntityDTO;
+import com.ustu.erdbsystem.ermodels.api.mapper.DTOMapper;
 import com.ustu.erdbsystem.ermodels.store.models.ModelEntity;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @AllArgsConstructor
 @Component
-public class ModelEntityDTOFactory implements DTOFactory<ModelEntityDTO, ModelEntity> {
+public class ModelEntityDTOMapper implements DTOMapper<ModelEntityDTO, ModelEntity> {
 
-    private AttributeDTOFactory attributeDTOFactory;
+    private AttributeDTOMapper attributeDTOFactory;
 
     @Override
     public ModelEntityDTO makeDTO(ModelEntity modelEntity) {

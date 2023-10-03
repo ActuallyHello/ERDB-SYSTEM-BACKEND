@@ -1,4 +1,4 @@
-package com.ustu.erdbsystem.persons.dto;
+package com.ustu.erdbsystem.persons.api.dto;
 
 import com.ustu.erdbsystem.persons.store.models.enums.PersonType;
 import lombok.Builder;

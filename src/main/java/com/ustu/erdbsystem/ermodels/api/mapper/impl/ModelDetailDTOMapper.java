@@ -1,24 +1,18 @@
-package com.ustu.erdbsystem.ermodels.factory.impl;
+package com.ustu.erdbsystem.ermodels.api.mapper.impl;
 
-import com.ustu.erdbsystem.ermodels.dto.ModelDetailDTO;
-import com.ustu.erdbsystem.ermodels.dto.ModelEntityDTO;
-import com.ustu.erdbsystem.ermodels.dto.ModelPreviewDTO;
-import com.ustu.erdbsystem.ermodels.factory.DTOFactory;
+import com.ustu.erdbsystem.ermodels.api.dto.ModelDetailDTO;
+import com.ustu.erdbsystem.ermodels.api.mapper.DTOMapper;
 import com.ustu.erdbsystem.ermodels.store.models.Model;
-import com.ustu.erdbsystem.persons.dto.PersonCredentialsDTO;
-import com.ustu.erdbsystem.persons.factory.impl.PersonCredentialsDTOFactory;
+import com.ustu.erdbsystem.persons.api.mapper.impl.PersonCredentialsDTOMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @AllArgsConstructor
 @Component
-public class ModelDetailDTOFactory implements DTOFactory<ModelDetailDTO, Model> {
+public class ModelDetailDTOMapper implements DTOMapper<ModelDetailDTO, Model> {
 
-    private PersonCredentialsDTOFactory personCredentialsDTOFactory;
-    private ModelEntityDTOFactory modelEntityDTOFactory;
+    private PersonCredentialsDTOMapper personCredentialsDTOFactory;
+    private ModelEntityDTOMapper modelEntityDTOFactory;
     @Override
     public ModelDetailDTO makeDTO(Model model) {
         if (model == null) throw new IllegalArgumentException("model is null!");

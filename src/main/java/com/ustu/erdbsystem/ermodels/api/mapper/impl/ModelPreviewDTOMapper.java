@@ -1,18 +1,17 @@
-package com.ustu.erdbsystem.ermodels.factory.impl;
+package com.ustu.erdbsystem.ermodels.api.mapper.impl;
 
-import com.ustu.erdbsystem.ermodels.dto.ModelPreviewDTO;
-import com.ustu.erdbsystem.ermodels.factory.DTOFactory;
+import com.ustu.erdbsystem.ermodels.api.dto.ModelPreviewDTO;
+import com.ustu.erdbsystem.ermodels.api.mapper.DTOMapper;
 import com.ustu.erdbsystem.ermodels.store.models.Model;
-import com.ustu.erdbsystem.persons.dto.PersonCredentialsDTO;
-import com.ustu.erdbsystem.persons.factory.impl.PersonCredentialsDTOFactory;
+import com.ustu.erdbsystem.persons.api.mapper.impl.PersonCredentialsDTOMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @AllArgsConstructor
 @Component
-public class ModelPreviewDTOFactory implements DTOFactory<ModelPreviewDTO, Model> {
+public class ModelPreviewDTOMapper implements DTOMapper<ModelPreviewDTO, Model> {
 
-    private PersonCredentialsDTOFactory personCredentialsDTOFactory;
+    private PersonCredentialsDTOMapper personCredentialsDTOFactory;
 
     @Override
     public ModelPreviewDTO makeDTO(Model model) {
