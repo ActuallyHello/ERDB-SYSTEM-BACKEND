@@ -1,20 +1,26 @@
 package com.ustu.erdbsystem.ermodels.service.impl;
 
-import com.ustu.erdbsystem.ermodels.api.dto.CreateModelDTO;
-import com.ustu.erdbsystem.ermodels.api.mapper.impl.ModelDetailDTOMapper;
-import com.ustu.erdbsystem.ermodels.api.mapper.impl.ModelPreviewDTOMapper;
+import com.ustu.erdbsystem.ermodels.api.dto.ModelDTO;
+import com.ustu.erdbsystem.ermodels.api.dto.ModelEntityDTO;
+import com.ustu.erdbsystem.ermodels.api.dto.RelationDTO;
 import com.ustu.erdbsystem.ermodels.service.ModelService;
 import com.ustu.erdbsystem.ermodels.store.models.Attribute;
 import com.ustu.erdbsystem.ermodels.store.models.Model;
 import com.ustu.erdbsystem.ermodels.store.models.ModelEntity;
+import com.ustu.erdbsystem.ermodels.store.models.Relation;
+import com.ustu.erdbsystem.ermodels.store.models.enums.AttributeType;
+import com.ustu.erdbsystem.ermodels.store.models.enums.Power;
 import com.ustu.erdbsystem.ermodels.store.repos.AttributeRepo;
 import com.ustu.erdbsystem.ermodels.store.repos.ModelEntityRepo;
 import com.ustu.erdbsystem.ermodels.store.repos.ModelRepo;
+import com.ustu.erdbsystem.ermodels.store.repos.RelationRepo;
+import com.ustu.erdbsystem.persons.store.models.Person;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,11 +30,9 @@ import java.util.Optional;
 public class ModelServiceImpl implements ModelService {
 
     private ModelRepo modelRepo;
+    private RelationRepo relationRepo;
     private ModelEntityRepo modelEntityRepo;
     private AttributeRepo attributeRepo;
-
-    private ModelPreviewDTOMapper modelPreviewDTOFactory;
-    private ModelDetailDTOMapper modelDetailDTOFactory;
 
     @Override
     @Transactional
@@ -48,38 +52,83 @@ public class ModelServiceImpl implements ModelService {
         return modelRepo.findById(id);
     }
 
+    @Override
+    @Transactional
+    public List<Relation> getRelationsByEntityIds(List<Long> modelEntityIdList) {
+        System.out.println("START TO EXECUTE THIS" + modelEntityIdList);
+        var result = relationRepo.findByModelEntity1IdOrModelEntity2IdInModelEntityIdList(modelEntityIdList);
+        System.out.println("WE GET RESULT" + result.size());
+        return result;
+    }
+
     /**
      * CREATE A MODEL WITH ENTITIES AND THEIR ATTRIBUTES
      * Create model object, then iterate through model entities
      *  and then iterate through entity attributes
-     * @param createModelDTO - dto from client
+     * @param person - author
      * @return - model's id
      */
     @Override
     @Transactional
-    public Long create(CreateModelDTO createModelDTO) {
+    public Long create(Person person, ModelDTO modelDTO, List<ModelEntityDTO> modelEntityDTOList, List<RelationDTO> relationDTOList) {
         Model model = Model.builder()
-                .title(createModelDTO.title())
-                .description(createModelDTO.description())
-                .topic(createModelDTO.topic())
-                .person(createModelDTO.person())
-                .isTaskResult(createModelDTO.isTaskResult())
+                .person(person)
+                .title(modelDTO.getTitle())
+                .description(modelDTO.getDescription())
+                .topic(modelDTO.getTopic())
+                .isTaskResult(modelDTO.getIsTaskResult())
                 .build();
-        for (var modelEntityDTO : createModelDTO.modelEntityDTOList()) {
+        model = modelRepo.saveAndFlush(model);
+        var modelEntityList = collectEntitiesWithAttributesToModel(modelEntityDTOList, model);
+        modelEntityRepo.saveAll(modelEntityList);
+        var relationList = collectRelationsToEntities(relationDTOList, modelEntityList);
+        relationRepo.saveAll(relationList);
+        return model.getId();
+    }
+
+    private List<ModelEntity> collectEntitiesWithAttributesToModel(List<ModelEntityDTO> modelEntityDTOList, Model model) {
+        for (var modelEntityDTO : modelEntityDTOList) {
             ModelEntity modelEntity = ModelEntity.builder()
-                            .title(modelEntityDTO.title())
-                            .model(model)
-                            .build();
-            for (var attributeDTO : modelEntityDTO.attributeDTOList()) {
+                    .title(modelEntityDTO.getTitle())
+                    .model(model)
+                    .build();
+            for (var attributeDTO : modelEntityDTO.getAttributeDTOList()) {
                 Attribute attribute = Attribute.builder()
-                        .title(attributeDTO.title())
-                        .attributeType(attributeDTO.attributeType())
+                        .title(attributeDTO.getTitle())
+                        .attributeType(AttributeType.fromString(attributeDTO.getAttributeType()))
                         .modelEntity(modelEntity)
                         .build();
                 modelEntity.getAttributeList().add(attribute);
             }
             model.getModelEntityList().add(modelEntity);
         }
-        return modelRepo.saveAndFlush(model).getId();
+        return model.getModelEntityList();
+    }
+
+    private List<Relation> collectRelationsToEntities(List<RelationDTO> relationDTOList, List<ModelEntity> modelEntityList) {
+        List<Relation> relationList = new ArrayList<>();
+        for (var relationDTO : relationDTOList) {
+            ModelEntity fromEntity = null;
+            ModelEntity toEntity = null;
+            for (var modelEntity : modelEntityList) {
+                if (relationDTO.getFromEntity().equals(modelEntity.getTitle())) {
+                    fromEntity = modelEntity;
+                }
+                if (relationDTO.getToEntity().equals(modelEntity.getTitle())) {
+                    toEntity = modelEntity;
+                }
+                if (fromEntity != null && toEntity != null) break;
+            }
+            if (fromEntity == null || toEntity == null) {
+                throw new RuntimeException("No match with relations"); // TODO CUSTOM EXCEPTION
+            }
+            relationList.add(Relation.builder()
+                    .modelEntity1(fromEntity)
+                    .modelEntity2(toEntity)
+                    .power(Power.fromString(relationDTO.getPower()))
+                    .build()
+            );
+        }
+        return relationList;
     }
 }
