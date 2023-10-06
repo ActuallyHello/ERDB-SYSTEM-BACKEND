@@ -9,4 +9,17 @@ public enum AttributeType {
     PRIMARY_KEY("PK"), FOREIGN_KEY("FK"), ATTRIBUTE("ATTR");
 
     private final String attributeType;
+
+    public static AttributeType fromString(String shortAttributePower) {
+        for (var at : AttributeType.values()) {
+            if (at.attributeType.equalsIgnoreCase(shortAttributePower)) {
+                return at;
+            }
+        }
+        throw new IllegalArgumentException("NO SUCH ENUM AttributeType WITH VALUE \"%s\"!".formatted(shortAttributePower));
+    }
+
+    public String getValue() {
+        return attributeType;
+    }
 }

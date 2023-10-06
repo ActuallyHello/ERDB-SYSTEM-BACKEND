@@ -1,6 +1,6 @@
 package com.ustu.erdbsystem.ermodels.api.dto;
 
-import com.ustu.erdbsystem.ermodels.store.models.enums.AttributeType;
+import com.ustu.erdbsystem.ermodels.store.models.enums.Power;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,8 +12,9 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class AttributeDTO {
+public class RelationDTO {
     private Long id;
-    private String title;
-    private String attributeType;
+    private String fromEntity;
+    private String power;
+    private String toEntity;
 }

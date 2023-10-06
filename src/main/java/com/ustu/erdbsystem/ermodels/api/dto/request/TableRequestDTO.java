@@ -1,10 +1,9 @@
-package com.ustu.erdbsystem.ermodels.api.dto;
+package com.ustu.erdbsystem.ermodels.api.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import java.util.List;
 
@@ -12,9 +11,9 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
-public class ModelEntityDTO {
-    private Long id;
+public class TableRequestDTO {
     private String title;
-    private List<AttributeDTO> attributeDTOList;
+    private List<String> pkFields;
+    private List<String> fkFields;
+    private List<String> attrFields;
 }
