@@ -11,7 +11,7 @@ public class PersonCredentialsDTOMapper {
                 .firstName(person.getFirstName())
                 .lastName(person.getLastName())
                 .middleName(person.getMiddleName())
-                .personType(person.getPersonType())
+                .personType(person.getPersonType().getValue())
                 .build();
     }
 }

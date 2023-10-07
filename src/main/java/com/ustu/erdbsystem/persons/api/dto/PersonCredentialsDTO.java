@@ -15,5 +15,5 @@ public class PersonCredentialsDTO {
     private String firstName;
     private String lastName;
     private String middleName;
-    private PersonType personType;
+    private String personType;
 }
