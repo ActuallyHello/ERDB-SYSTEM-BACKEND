@@ -1,6 +1,7 @@
 package com.ustu.erdbsystem.ermodels.store.models;
 
 import com.ustu.erdbsystem.ermodels.store.models.enums.Power;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,6 +17,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Setter
 @Getter
@@ -34,11 +37,13 @@ public class Relation {
     private Power power;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="entity1")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name="entity1", referencedColumnName = "id")
     private ModelEntity modelEntity1;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="entity2")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name="entity2", referencedColumnName = "id")
     private ModelEntity modelEntity2;
 
     @Override

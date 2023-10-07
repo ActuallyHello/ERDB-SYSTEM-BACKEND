@@ -1,5 +1,6 @@
 package com.ustu.erdbsystem.ermodels.store.models.enums;
 
+import com.ustu.erdbsystem.ermodels.exception.EnumValueException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -16,7 +17,7 @@ public enum Power {
                 return p;
             }
         }
-        throw new IllegalArgumentException("NO SUCH ENUM POWER WITH VALUE \"%s\"!".formatted(shortPower));
+        throw new EnumValueException("NO SUCH ENUM POWER WITH VALUE \"%s\"!".formatted(shortPower));
     }
 
     public String getValue() {
