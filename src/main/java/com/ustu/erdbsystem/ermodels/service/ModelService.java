@@ -13,10 +13,8 @@ import java.util.Optional;
 public interface ModelService {
     List<Model> getAll();
     List<Model> getAll(List<Long> idList);
-
     Optional<Model> getById(Long id);
-
+    void deleteModel(Model model);
     Long create(Person person, ModelDTO modelDTO, List<ModelEntityDTO> modelEntityDTO, List<RelationDTO> relationDTO);
-
     List<Relation> getRelationsByEntityIds(List<Long> modelEntityIdList);
 }

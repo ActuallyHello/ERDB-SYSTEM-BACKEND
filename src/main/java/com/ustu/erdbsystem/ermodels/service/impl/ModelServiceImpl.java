@@ -3,6 +3,9 @@ package com.ustu.erdbsystem.ermodels.service.impl;
 import com.ustu.erdbsystem.ermodels.api.dto.ModelDTO;
 import com.ustu.erdbsystem.ermodels.api.dto.ModelEntityDTO;
 import com.ustu.erdbsystem.ermodels.api.dto.RelationDTO;
+import com.ustu.erdbsystem.ermodels.exception.EnumValueException;
+import com.ustu.erdbsystem.ermodels.exception.RelationDoesNotMatchEntityException;
+import com.ustu.erdbsystem.ermodels.exception.RequestDataValidationException;
 import com.ustu.erdbsystem.ermodels.service.ModelService;
 import com.ustu.erdbsystem.ermodels.store.models.Attribute;
 import com.ustu.erdbsystem.ermodels.store.models.Model;
@@ -32,7 +35,6 @@ public class ModelServiceImpl implements ModelService {
     private ModelRepo modelRepo;
     private RelationRepo relationRepo;
     private ModelEntityRepo modelEntityRepo;
-    private AttributeRepo attributeRepo;
 
     @Override
     @Transactional
@@ -55,10 +57,21 @@ public class ModelServiceImpl implements ModelService {
     @Override
     @Transactional
     public List<Relation> getRelationsByEntityIds(List<Long> modelEntityIdList) {
-        System.out.println("START TO EXECUTE THIS" + modelEntityIdList);
-        var result = relationRepo.findByModelEntity1IdOrModelEntity2IdInModelEntityIdList(modelEntityIdList);
-        System.out.println("WE GET RESULT" + result.size());
-        return result;
+        return relationRepo.findByModelEntity1IdOrModelEntity2IdInModelEntityIdList(modelEntityIdList);
+    }
+
+    @Override
+    @Transactional
+    public void deleteModel(Model model) {
+        var modelEntityList = model.getModelEntityList();
+        if (!modelEntityList.isEmpty()) {
+            var relationList = getRelationsByEntityIds(modelEntityList.stream()
+                    .map(ModelEntity::getId)
+                    .toList()
+            );
+            relationRepo.deleteAll(relationList);
+        }
+        modelRepo.delete(model);
     }
 
     /**
@@ -70,7 +83,10 @@ public class ModelServiceImpl implements ModelService {
      */
     @Override
     @Transactional
-    public Long create(Person person, ModelDTO modelDTO, List<ModelEntityDTO> modelEntityDTOList, List<RelationDTO> relationDTOList) {
+    public Long create(Person person,
+                       ModelDTO modelDTO,
+                       List<ModelEntityDTO> modelEntityDTOList,
+                       List<RelationDTO> relationDTOList) throws RelationDoesNotMatchEntityException, EnumValueException {
         Model model = Model.builder()
                 .person(person)
                 .title(modelDTO.getTitle())
@@ -120,7 +136,9 @@ public class ModelServiceImpl implements ModelService {
                 if (fromEntity != null && toEntity != null) break;
             }
             if (fromEntity == null || toEntity == null) {
-                throw new RuntimeException("No match with relations"); // TODO CUSTOM EXCEPTION
+                throw new RelationDoesNotMatchEntityException(
+                        "Relation (entity1=%s/entity2=%s) does not match with entities in table!".formatted(relationDTO.getFromEntity(), relationDTO.getToEntity())
+                );
             }
             relationList.add(Relation.builder()
                     .modelEntity1(fromEntity)
