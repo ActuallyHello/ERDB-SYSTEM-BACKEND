@@ -24,6 +24,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 @Entity
 @Table(name="_group")
 public class Group {
@@ -33,6 +34,9 @@ public class Group {
     private Long id;
     @Column(nullable = false, unique = true)
     private String title;
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean isActive = true;
 
     @OneToMany(
             fetch = FetchType.LAZY,
