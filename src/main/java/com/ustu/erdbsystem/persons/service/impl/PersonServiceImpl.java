@@ -1,6 +1,7 @@
 package com.ustu.erdbsystem.persons.service.impl;
 
 import com.ustu.erdbsystem.persons.api.dto.PersonCredentialsDTO;
+import com.ustu.erdbsystem.persons.api.dto.request.CreateGroupRequestDTO;
 import com.ustu.erdbsystem.persons.api.dto.request.CreateUserRequestDTO;
 import com.ustu.erdbsystem.persons.service.PersonService;
 import com.ustu.erdbsystem.persons.store.models.Group;
@@ -18,12 +19,14 @@ import com.ustu.erdbsystem.persons.store.repos.TeacherRepo;
 import com.ustu.erdbsystem.persons.store.repos.UserRepo;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @AllArgsConstructor
+@Slf4j
 @Service
 public class PersonServiceImpl implements PersonService {
 
@@ -37,6 +40,7 @@ public class PersonServiceImpl implements PersonService {
     @Override
     @Transactional
     public Optional<Person> getPersonById(Long id) {
+        log.info("");
         return personRepo.findById(id);
     }
 
@@ -45,7 +49,7 @@ public class PersonServiceImpl implements PersonService {
         return userRepo.findById(id);
     }
 
-    @Override
+//    @Override
     @Transactional
     public List<Group> getStudentGroups(Boolean isActive) {
         return groupRepo.findByIsActive(isActive);
@@ -57,7 +61,7 @@ public class PersonServiceImpl implements PersonService {
         return positionRepo.findAll();
     }
 
-    @Override
+//    @Override
     @Transactional
     public Optional<Student> getStudentByPerson(Person person) {
         return studentRepo.findByPerson(person);
@@ -95,7 +99,7 @@ public class PersonServiceImpl implements PersonService {
         return person.getId();
     }
 
-    @Override
+//    @Override
     @Transactional
     public Long saveStudent(Person person, Group group) {
         var student = studentRepo.saveAndFlush(Student.builder()
@@ -113,6 +117,12 @@ public class PersonServiceImpl implements PersonService {
                 .position(position)
                 .build());
         return teacher.getId();
+    }
+
+//    @Override
+    @Transactional
+    public Long saveGroup(CreateGroupRequestDTO group) {
+        return null;
     }
 
 }
