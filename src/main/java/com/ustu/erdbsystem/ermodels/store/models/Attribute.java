@@ -22,7 +22,7 @@ import lombok.ToString;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(exclude = "modelEntity")
 @Entity
 @Table(name="attribute")
 public class Attribute {
@@ -37,7 +37,7 @@ public class Attribute {
 
     @ManyToOne(
             fetch = FetchType.EAGER,
-            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}
+            optional = false
     )
     private ModelEntity modelEntity;
 
