@@ -9,10 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PersonRequestDTO {
-    private String firstName;
-    private String lastName;
-    private String middleName;
-    private String personType;
-
+public class CreatePositionRequestDTO {
+    private String title;
 }

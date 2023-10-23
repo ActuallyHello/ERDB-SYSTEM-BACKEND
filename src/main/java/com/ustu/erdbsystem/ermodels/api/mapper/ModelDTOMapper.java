@@ -29,4 +29,14 @@ public class ModelDTOMapper {
                 .isTaskResult(createModelRequestDTO.getIsTaskResult())
                 .build();
     }
+
+    public static Model fromDTO(ModelDTO modelDTO) {
+        if (modelDTO == null) throw new IllegalArgumentException("modelDTO is null!");
+        return Model.builder()
+                .title(modelDTO.getTitle())
+                .description(modelDTO.getDescription())
+                .topic(modelDTO.getTopic())
+                .isTaskResult(modelDTO.getIsTaskResult())
+                .build();
+    }
 }

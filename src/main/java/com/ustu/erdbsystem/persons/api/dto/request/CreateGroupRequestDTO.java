@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GroupRequestDTO {
+public class CreateGroupRequestDTO {
     String title;
 }

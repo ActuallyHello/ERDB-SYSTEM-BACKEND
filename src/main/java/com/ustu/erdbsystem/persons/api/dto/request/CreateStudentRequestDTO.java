@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateStudentRequestDTO {
-    private PersonRequestDTO personRequestDTO;
-    private GroupRequestDTO groupRequestDTO;
+    private Long personId;
+    private Long groupId;
 }
