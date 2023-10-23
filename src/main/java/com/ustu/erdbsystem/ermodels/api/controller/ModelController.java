@@ -1,17 +1,24 @@
 package com.ustu.erdbsystem.ermodels.api.controller;
 
+import com.ustu.erdbsystem.ermodels.api.dto.ModelDTO;
 import com.ustu.erdbsystem.ermodels.api.dto.ModelEntityDTO;
+import com.ustu.erdbsystem.ermodels.api.dto.RelationDTO;
 import com.ustu.erdbsystem.ermodels.api.dto.response.ModelDetailDTO;
 import com.ustu.erdbsystem.ermodels.api.dto.response.ModelPreviewDTO;
 import com.ustu.erdbsystem.ermodels.api.dto.request.CreateModelRequestDTO;
 import com.ustu.erdbsystem.ermodels.api.mapper.ModelDTOMapper;
 import com.ustu.erdbsystem.ermodels.api.mapper.ModelEntityDTOMapper;
 import com.ustu.erdbsystem.ermodels.api.mapper.RelationDTOMapper;
-import com.ustu.erdbsystem.ermodels.exception.EnumValueException;
-import com.ustu.erdbsystem.ermodels.exception.NotFoundException;
-import com.ustu.erdbsystem.ermodels.exception.RelationDoesNotMatchEntityException;
-import com.ustu.erdbsystem.ermodels.exception.RequestDataValidationException;
+import com.ustu.erdbsystem.ermodels.exception.response.ModelDBException;
+import com.ustu.erdbsystem.ermodels.exception.response.ModelNotFoundException;
+import com.ustu.erdbsystem.ermodels.exception.response.ModelOwnerNotFoundException;
+import com.ustu.erdbsystem.ermodels.exception.response.ModelValidationException;
+import com.ustu.erdbsystem.ermodels.exception.service.ModelCreationException;
+import com.ustu.erdbsystem.ermodels.exception.service.ModelDeleteException;
+import com.ustu.erdbsystem.ermodels.exception.validation.EnumValueException;
+import com.ustu.erdbsystem.ermodels.service.ModelEntityAttributeService;
 import com.ustu.erdbsystem.ermodels.service.ModelService;
+import com.ustu.erdbsystem.ermodels.service.RelationService;
 import com.ustu.erdbsystem.persons.api.mapper.PersonCredentialsDTOMapper;
 import com.ustu.erdbsystem.persons.store.repos.PersonRepo;
 import lombok.AllArgsConstructor;
@@ -33,8 +40,10 @@ public class ModelController {
 
     private ModelService modelService;
     private PersonRepo personRepo; // TODO: change with service
+    private RelationService relationService;
+    private ModelEntityAttributeService modelEntityAttributeService;
 
-    @GetMapping
+    @GetMapping("")
     public ResponseEntity<List<ModelPreviewDTO>> getAllPreviewModels() {
         var result = modelService.getAll().stream()
                 .map(model -> {
@@ -52,17 +61,16 @@ public class ModelController {
     @GetMapping("/{id}")
     public ResponseEntity<ModelDetailDTO> getModelDetailById(@PathVariable Long id) {
         var model = modelService.getById(id)
-                .orElseThrow(() -> new NotFoundException("Model with id=%d was not found!".formatted(id)));
-
+                .orElseThrow(() -> new ModelNotFoundException("Model with id=%d was not found!".formatted(id)));
         var personCredentialsDTO = PersonCredentialsDTOMapper.makeDTO(model.getPerson());
         var modelDTO = ModelDTOMapper.makeDTO(model);
-        var modelEntityDTOList = model.getModelEntityList().stream()
+        var modelEntityDTOList = modelEntityAttributeService.getAllByModel(model).stream()
                 .map(ModelEntityDTOMapper::makeDTO)
                 .toList();
         var modelEntityIdList = modelEntityDTOList.stream()
                 .map(ModelEntityDTO::getId)
                 .toList();
-        var relationDTOList = modelService.getRelationsByEntityIds(modelEntityIdList).stream()
+        var relationDTOList = relationService.getRelationsByEntityIds(modelEntityIdList).stream()
                 .map(RelationDTOMapper::makeDTO)
                 .toList();
         return ResponseEntity.ok(ModelDetailDTO.builder()
@@ -77,28 +85,39 @@ public class ModelController {
     @PostMapping
     public ResponseEntity<Long> createModel(@RequestBody CreateModelRequestDTO createModelRequestDTO) {
         var person = personRepo.findById(createModelRequestDTO.getPersonId())
-                .orElseThrow(() -> new NotFoundException("Person with id=%d was not found".formatted(createModelRequestDTO.getPersonId())));
+                .orElseThrow(() -> new ModelOwnerNotFoundException("Person with id=%d was not found".formatted(createModelRequestDTO.getPersonId())));
+        ModelDTO modelDTO;
+        List<ModelEntityDTO> modelEntityDTOList;
+        List<RelationDTO> relationDTOList;
         try {
-            var modelDTO = ModelDTOMapper.makeDTO(createModelRequestDTO);
-            var modelEntityDTOList = createModelRequestDTO.getTableList().stream()
+            modelDTO = ModelDTOMapper.makeDTO(createModelRequestDTO);
+            modelEntityDTOList = createModelRequestDTO.getTableList().stream()
                     .map(ModelEntityDTOMapper::makeDTO)
                     .toList();
-            var relationDTOList = createModelRequestDTO.getRelationList().stream()
+            relationDTOList = createModelRequestDTO.getRelationList().stream()
                     .map(RelationDTOMapper::makeDTO)
                     .toList();
-            var modelId = modelService.create(person, modelDTO, modelEntityDTOList, relationDTOList);
-            return ResponseEntity.ok(modelId);
-        } catch (RelationDoesNotMatchEntityException | EnumValueException e) {
-            throw new RequestDataValidationException("Validation error! " + e.getMessage(), e);
+        } catch (IllegalArgumentException | EnumValueException exception) {
+            throw new ModelValidationException("Validation error! " + exception.getMessage(), exception);
+        }
+
+        try {
+            var model = modelService.create(person, modelDTO, modelEntityDTOList, relationDTOList);
+            return ResponseEntity.ok(model.getId());
+        } catch (ModelCreationException exception) {
+            throw new ModelDBException("Error when creating model! " + exception.getMessage(), exception);
         }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteModel(@PathVariable Long id) {
-        modelService.getById(id).ifPresentOrElse(
-                modelService::deleteModel,
-                () -> { throw new NotFoundException("Model with id=%d was not found".formatted(id)); }
-        );
-        return ResponseEntity.noContent().build();
+        var model = modelService.getById(id)
+                .orElseThrow(() -> new ModelNotFoundException("Model with id=%d was not found!".formatted(id)));
+        try {
+            modelService.deleteModel(model);
+            return ResponseEntity.noContent().build();
+        } catch (ModelDeleteException exception) {
+            throw new ModelDBException("Error when deleting model! " + exception.getMessage(), exception);
+        }
     }
 }
