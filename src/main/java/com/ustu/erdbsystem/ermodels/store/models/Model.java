@@ -19,6 +19,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -32,7 +34,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(exclude = {"modelEntityList", "person", "resultList"})
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name="model")
@@ -47,6 +49,7 @@ public class Model {
     private String description;
     @Column(nullable = false)
     private String topic;
+    @Column(updatable = false)
     @CreatedDate
     private Instant createdAt;
     @LastModifiedDate
@@ -56,31 +59,39 @@ public class Model {
     private Boolean isTaskResult = false;
 
     @OneToMany(
-            fetch = FetchType.LAZY,
             mappedBy = "model",
-            orphanRemoval = true,
-            cascade = CascadeType.ALL
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
     )
     @Builder.Default
-    @ToString.Exclude
     private List<ModelEntity> modelEntityList = new ArrayList<>();
 
+    public void addModelEntity(ModelEntity modelEntity) {
+        if (modelEntity == null) throw new IllegalArgumentException("ModelEntity is null!");
+        this.modelEntityList.add(modelEntity);
+        modelEntity.setModel(this);
+    }
+
     @ManyToOne(
-            fetch = FetchType.LAZY,
-            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}
+            fetch = FetchType.EAGER,
+            optional = false
     )
-    @ToString.Exclude
     private Person person;
 
     @OneToMany(
-            fetch = FetchType.LAZY,
             mappedBy = "model",
-            orphanRemoval = true,
-            cascade = CascadeType.ALL
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
     )
-    @ToString.Exclude
     private List<Result> resultList = new ArrayList<>();
 
+    public void addResult(Result result) {
+        if (result == null) throw new IllegalArgumentException("Result is null!");
+        this.resultList.add(result);
+        result.setModel(this);
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -16,6 +16,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +27,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(exclude = {"attributeList", "model"})
 @Entity
 @Table(name="entity")
 public class ModelEntity {
@@ -37,20 +39,25 @@ public class ModelEntity {
     private String title;
 
     @ManyToOne(
-            fetch = FetchType.EAGER,
-            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}
+            fetch = FetchType.LAZY,
+            optional = false
     )
     private Model model;
 
     @OneToMany(
-            fetch = FetchType.LAZY,
             mappedBy = "modelEntity",
-            orphanRemoval = true,
-            cascade = CascadeType.ALL
+            fetch = FetchType.EAGER,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
     )
     @Builder.Default
-    @ToString.Exclude
     private List<Attribute> attributeList = new ArrayList<>();
+
+    public void addAttribute(Attribute attribute) {
+        if (attribute == null) throw new IllegalArgumentException("Attribute is null!");
+        this.attributeList.add(attribute);
+        attribute.setModelEntity(this);
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -18,6 +18,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -30,6 +31,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"model", "taskList"})
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name="denormalize_model")
@@ -43,11 +45,16 @@ public class DenormalizeModel {
     @LastModifiedDate
     private Instant updatedAt;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY
+    )
     @JoinColumn(name = "model_id", referencedColumnName = "id")
     private Model model;
 
-    @ManyToMany(mappedBy = "denormalizeModelList")
+    @ManyToMany(
+            mappedBy = "denormalizeModelList"
+    )
     private List<Task> taskList = new ArrayList<>();
 
     @Override
