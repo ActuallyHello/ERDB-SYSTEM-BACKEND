@@ -28,6 +28,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"user", "modelList"})
 @Entity
 @Table(name="person")
 public class Person {
@@ -43,19 +44,26 @@ public class Person {
     @Column(nullable = false)
     private PersonType personType;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL
+    )
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
     @OneToMany(
-            fetch = FetchType.LAZY,
             mappedBy = "person",
-            orphanRemoval = true,
-            cascade = CascadeType.ALL
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
     )
     @Builder.Default
-    @ToString.Exclude
     private List<Model> modelList = new ArrayList<>();
+
+    public void addModel(Model model) {
+        this.modelList.add(model);
+        model.setPerson(this);
+    }
 
     @Override
     public boolean equals(Object o) {

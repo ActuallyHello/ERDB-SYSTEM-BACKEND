@@ -18,6 +18,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"position", "taskList", "resultList", "person"})
 @Entity
 @Table(name="teacher")
 public class Teacher {
@@ -37,27 +39,40 @@ public class Teacher {
 
     @ManyToOne(
             fetch = FetchType.EAGER,
-            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}
+            optional = false
     )
     private Position position;
 
     @OneToMany(
-            fetch = FetchType.LAZY,
             mappedBy = "teacher",
-            orphanRemoval = true,
-            cascade = CascadeType.ALL
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
     )
     private List<Task> taskList = new ArrayList<>();
 
+    public void addTask(Task task) {
+        this.taskList.add(task);
+        task.setTeacher(this);
+    }
+
     @OneToMany(
-            fetch = FetchType.LAZY,
             mappedBy = "teacher",
-            orphanRemoval = true,
-            cascade = CascadeType.ALL
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
     )
     private List<Result> resultList = new ArrayList<>();
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    public void addResult(Result result) {
+        this.resultList.add(result);
+        result.setTeacher(this);
+    }
+
+    @OneToOne(
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY
+    )
     @JoinColumn(name = "person_id", referencedColumnName = "id")
     private Person person;
 

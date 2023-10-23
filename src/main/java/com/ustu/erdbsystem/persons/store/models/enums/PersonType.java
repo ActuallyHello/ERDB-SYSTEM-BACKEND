@@ -1,7 +1,6 @@
 package com.ustu.erdbsystem.persons.store.models.enums;
 
-import com.ustu.erdbsystem.ermodels.exception.EnumValueException;
-import com.ustu.erdbsystem.ermodels.store.models.enums.Power;
+import com.ustu.erdbsystem.ermodels.exception.validation.EnumValueException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

@@ -1,6 +1,7 @@
 package com.ustu.erdbsystem.persons.store.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -43,13 +44,23 @@ public class User {
     private String email;
     @Column(nullable = false)
     private Boolean isActive = true;
+    @Column(updatable = false)
     @CreatedDate
     private Instant createdAt;
     @LastModifiedDate
     private Instant updatedAt;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToOne(
+            mappedBy = "user",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL
+    )
     private Person person;
+
+    public void setPerson(Person person) {
+        this.person = person;
+        person.setUser(this);
+    }
 
     @Override
     public boolean equals(Object o) {

@@ -24,7 +24,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(exclude = {"studentList"})
 @Entity
 @Table(name="_group")
 public class Group {
@@ -39,14 +39,18 @@ public class Group {
     private Boolean isActive = true;
 
     @OneToMany(
-            fetch = FetchType.LAZY,
             mappedBy = "group",
-            orphanRemoval = true,
-            cascade = CascadeType.ALL
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
     )
     @Builder.Default
-    @ToString.Exclude
     private List<Student> studentList = new ArrayList<>();
+
+    public void addStudent(Student student) {
+        this.studentList.add(student);
+        student.setGroup(this);
+    }
 
     @Override
     public boolean equals(Object o) {

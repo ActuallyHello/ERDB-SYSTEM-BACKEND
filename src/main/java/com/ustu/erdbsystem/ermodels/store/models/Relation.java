@@ -36,13 +36,17 @@ public class Relation {
     @Column(nullable = false)
     private Power power;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @ManyToOne(
+            fetch = FetchType.EAGER,
+            optional = false
+    )
     @JoinColumn(name="entity1", referencedColumnName = "id")
     private ModelEntity modelEntity1;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @ManyToOne(
+            fetch = FetchType.EAGER,
+            optional = false
+    )
     @JoinColumn(name="entity2", referencedColumnName = "id")
     private ModelEntity modelEntity2;
 

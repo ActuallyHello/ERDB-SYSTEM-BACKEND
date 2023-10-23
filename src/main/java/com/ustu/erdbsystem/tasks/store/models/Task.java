@@ -21,6 +21,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -35,6 +36,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"teacher", "taskStudentList", "denormalizeModelList"})
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name="task")
@@ -48,6 +50,7 @@ public class Task {
     private String description;
     @Column(nullable = false)
     private Complexity complexity;
+    @Column(updatable = false)
     @CreatedDate
     private Instant createdAt;
     @LastModifiedDate
@@ -55,7 +58,7 @@ public class Task {
 
     @ManyToOne(
             fetch = FetchType.EAGER,
-            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}
+            optional = false
     )
     private Teacher teacher;
 

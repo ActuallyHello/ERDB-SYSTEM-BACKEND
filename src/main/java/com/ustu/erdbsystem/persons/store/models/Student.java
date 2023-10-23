@@ -17,6 +17,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"group", "taskStudentList", "person"})
 @Entity
 @Table(name="student")
 public class Student {
@@ -36,14 +38,27 @@ public class Student {
 
     @ManyToOne(
             fetch = FetchType.EAGER,
-            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}
+            optional = false
     )
     private Group group;
 
-    @OneToMany(mappedBy = "student")
+    @OneToMany(
+            mappedBy = "student",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private List<TaskStudent> taskStudentList = new ArrayList<>();
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    public void addTaskStudent(TaskStudent taskStudent) {
+        this.taskStudentList.add(taskStudent);
+        taskStudent.setStudent(this);
+    }
+
+    @OneToOne(
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY
+    )
     @JoinColumn(name = "person_id", referencedColumnName = "id")
     private Person person;
 

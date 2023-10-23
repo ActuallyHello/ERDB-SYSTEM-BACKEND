@@ -24,6 +24,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"teacherList"})
 @Entity
 @Table(name="position")
 public class Position {
@@ -35,14 +36,18 @@ public class Position {
     private String title;
 
     @OneToMany(
-            fetch = FetchType.LAZY,
             mappedBy = "position",
-            orphanRemoval = true,
-            cascade = CascadeType.ALL
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
     )
     @Builder.Default
-    @ToString.Exclude
     private List<Teacher> teacherList = new ArrayList<>();
+
+    public void addTeacher(Teacher teacher) {
+        this.teacherList.add(teacher);
+        teacher.setPosition(this);
+    }
 
     @Override
     public boolean equals(Object o) {
