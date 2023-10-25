@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateModelRequestDTO {
+    // TODO VALIDATION JSON
     private Long personId;
     private String title;
     private String description;
