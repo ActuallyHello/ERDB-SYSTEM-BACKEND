@@ -1,12 +1,14 @@
 package com.ustu.erdbsystem.ermodels.service.impl;
 
 import com.ustu.erdbsystem.ermodels.api.dto.ModelEntityDTO;
+import com.ustu.erdbsystem.ermodels.exception.service.ModelEntityCreationException;
 import com.ustu.erdbsystem.ermodels.service.ModelEntityAttributeService;
 import com.ustu.erdbsystem.ermodels.store.models.Attribute;
 import com.ustu.erdbsystem.ermodels.store.models.Model;
 import com.ustu.erdbsystem.ermodels.store.models.ModelEntity;
 import com.ustu.erdbsystem.ermodels.store.models.enums.AttributeType;
 import com.ustu.erdbsystem.ermodels.store.repos.ModelEntityRepo;
+import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,18 +39,24 @@ public class ModelEntityAttributeServiceImpl implements ModelEntityAttributeServ
             }
             model.addModelEntity(modelEntity);
         }
-        modelEntityRepo.saveAllAndFlush(model.getModelEntityList());
-        log.info("CREATED %d ENTITIES IN MODEL WITH ID=%d".formatted(
-                model.getModelEntityList().size(),
-                model.getId()
-        ));
-        return model.getModelEntityList();
+        try {
+            modelEntityRepo.saveAllAndFlush(model.getModelEntityList());
+            log.info("CREATED ENTITIES (%d) IN MODEL WITH ID=%d".formatted(
+                    model.getModelEntityList().size(),
+                    model.getId()
+            ));
+            return model.getModelEntityList();
+        } catch (PersistenceException exception) {
+            log.error("CANNOT CREATE ENTITIES WITH ATTRIBUTES: %s".formatted(exception.getMessage()));
+            throw new ModelEntityCreationException(exception.getMessage(), exception);
+        }
     }
 
     @Override
     @Transactional
     public List<ModelEntity> getAllByModel(Model model) {
         var modelEntityList = modelEntityRepo.getAllByModel(model);
+        log.info("GET ENTITIES (%d)".formatted(modelEntityList.size()));
         return modelEntityList;
     }
 }
