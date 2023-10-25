@@ -1,28 +1,19 @@
 package com.ustu.erdbsystem.persons.service.impl;
 
-import com.ustu.erdbsystem.persons.api.dto.PersonCredentialsDTO;
-import com.ustu.erdbsystem.persons.api.dto.request.CreateGroupRequestDTO;
-import com.ustu.erdbsystem.persons.api.dto.request.CreateUserRequestDTO;
+import com.ustu.erdbsystem.persons.api.dto.PersonDTO;
+import com.ustu.erdbsystem.persons.api.mapper.PersonDTOMapper;
+import com.ustu.erdbsystem.persons.exception.service.PersonCreationException;
+import com.ustu.erdbsystem.persons.exception.service.PersonDeleteException;
 import com.ustu.erdbsystem.persons.service.PersonService;
-import com.ustu.erdbsystem.persons.store.models.Group;
 import com.ustu.erdbsystem.persons.store.models.Person;
-import com.ustu.erdbsystem.persons.store.models.Position;
-import com.ustu.erdbsystem.persons.store.models.Student;
-import com.ustu.erdbsystem.persons.store.models.Teacher;
 import com.ustu.erdbsystem.persons.store.models.User;
-import com.ustu.erdbsystem.persons.store.models.enums.PersonType;
-import com.ustu.erdbsystem.persons.store.repos.GroupRepo;
 import com.ustu.erdbsystem.persons.store.repos.PersonRepo;
-import com.ustu.erdbsystem.persons.store.repos.PositionRepo;
-import com.ustu.erdbsystem.persons.store.repos.StudentRepo;
-import com.ustu.erdbsystem.persons.store.repos.TeacherRepo;
-import com.ustu.erdbsystem.persons.store.repos.UserRepo;
+import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -30,99 +21,59 @@ import java.util.Optional;
 @Service
 public class PersonServiceImpl implements PersonService {
 
-    private UserRepo userRepo;
     private PersonRepo personRepo;
-    private GroupRepo groupRepo;
-    private StudentRepo studentRepo;
-    private TeacherRepo teacherRepo;
-    private PositionRepo positionRepo;
 
     @Override
     @Transactional
-    public Optional<Person> getPersonById(Long id) {
-        log.info("");
-        return personRepo.findById(id);
-    }
-
-    @Override
-    public Optional<User> getUserById(Long id) {
-        return userRepo.findById(id);
-    }
-
-//    @Override
-    @Transactional
-    public List<Group> getStudentGroups(Boolean isActive) {
-        return groupRepo.findByIsActive(isActive);
+    public Optional<Person> getById(Long id) {
+        var person = personRepo.findById(id);
+        log.info("GET MODEL BY ID={}", id);
+        return person;
     }
 
     @Override
     @Transactional
-    public List<Position> getTeacherPositions() {
-        return positionRepo.findAll();
-    }
-
-//    @Override
-    @Transactional
-    public Optional<Student> getStudentByPerson(Person person) {
-        return studentRepo.findByPerson(person);
+    public Optional<Person> getByUser(User user) {
+        var person = personRepo.findByUser(user);
+        log.info("GET PERSON BY USER WITH ID={}", user.getId());
+        return person;
     }
 
     @Override
     @Transactional
-    public Optional<Teacher> getTeacherByPerson(Person person) {
-        return teacherRepo.findByPerson(person);
+    public Person create(PersonDTO personDTO, User user) {
+        var person = PersonDTOMapper.fromDTO(personDTO);
+        try {
+            person = personRepo.saveAndFlush(person);
+            log.info("CREATED PERSON WITH ID={}", person.getId());
+            return person;
+        } catch (PersistenceException exception) {
+            throw new PersonCreationException(exception.getMessage(), exception);
+        }
     }
 
     @Override
     @Transactional
-    public Long saveUser(CreateUserRequestDTO userDTO) {
-        var user = userRepo.saveAndFlush(User.builder()
-                .login(userDTO.getLogin())
-                .password(userDTO.getPassword())
-                .email(userDTO.getEmail())
-                .build()
-        );
-        return user.getId();
+    public void delete(Person person) {
+        try {
+            personRepo.delete(person);
+            log.info("PERSON WITH ID={} WAS DELETED", person.getId());
+        } catch (PersistenceException exception) {
+            log.error("CANNOT DELETE PERSON WITH ID={}! {}", person.getId(), exception.getMessage());
+            throw new PersonDeleteException(exception.getMessage(), exception);
+        }
     }
 
     @Override
     @Transactional
-    public Long savePerson(User user, PersonCredentialsDTO personDTO) {
-        var person = personRepo.saveAndFlush(Person.builder()
-                .firstName(personDTO.getFirstName())
-                .lastName(personDTO.getLastName())
-                .middleName(personDTO.getMiddleName())
-                .personType(PersonType.fromString(personDTO.getPersonType()))
-                .user(user)
-                .build()
-        );
-        return person.getId();
+    public Person update(Person personNew) {
+        try {
+            var person = personRepo.saveAndFlush(personNew);
+            log.info("PERSON WITH ID={} WAS UPDATED", person.getId());
+            return person;
+        } catch (PersistenceException exception) {
+            log.error("CANNOT UPDATE PERSON! {}", exception.getMessage());
+            throw new PersonCreationException(exception.getMessage(), exception);
+        }
     }
-
-//    @Override
-    @Transactional
-    public Long saveStudent(Person person, Group group) {
-        var student = studentRepo.saveAndFlush(Student.builder()
-                .person(person)
-                .group(group)
-                .build());
-        return student.getId();
-    }
-
-    @Override
-    @Transactional
-    public Long saveTeacher(Person person, Position position) {
-        var teacher = teacherRepo.saveAndFlush(Teacher.builder()
-                .person(person)
-                .position(position)
-                .build());
-        return teacher.getId();
-    }
-
-//    @Override
-    @Transactional
-    public Long saveGroup(CreateGroupRequestDTO group) {
-        return null;
-    }
-
 }
