@@ -16,6 +16,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -27,6 +28,7 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"password", "person"})
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name="_user")
@@ -43,24 +45,13 @@ public class User {
     @Column(nullable = false)
     private String email;
     @Column(nullable = false)
+    @Builder.Default
     private Boolean isActive = true;
     @Column(updatable = false)
     @CreatedDate
     private Instant createdAt;
     @LastModifiedDate
     private Instant updatedAt;
-
-    @OneToOne(
-            mappedBy = "user",
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL
-    )
-    private Person person;
-
-    public void setPerson(Person person) {
-        this.person = person;
-        person.setUser(this);
-    }
 
     @Override
     public boolean equals(Object o) {
