@@ -3,7 +3,7 @@ package com.ustu.erdbsystem.ermodels.api.dto.response;
 import com.ustu.erdbsystem.ermodels.api.dto.ModelDTO;
 import com.ustu.erdbsystem.ermodels.api.dto.ModelEntityDTO;
 import com.ustu.erdbsystem.ermodels.api.dto.RelationDTO;
-import com.ustu.erdbsystem.persons.api.dto.PersonCredentialsDTO;
+import com.ustu.erdbsystem.persons.api.dto.PersonDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,5 +19,5 @@ public class ModelDetailDTO {
     private ModelDTO modelDTO;
     private List<ModelEntityDTO> modelEntityDTOList;
     private List<RelationDTO> relationDTOList;
-    private PersonCredentialsDTO personCredentialsDTO;
+    private PersonDTO personDTO;
 }

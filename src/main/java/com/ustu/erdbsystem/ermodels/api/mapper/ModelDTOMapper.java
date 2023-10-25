@@ -33,6 +33,7 @@ public class ModelDTOMapper {
     public static Model fromDTO(ModelDTO modelDTO) {
         if (modelDTO == null) throw new IllegalArgumentException("modelDTO is null!");
         return Model.builder()
+                .id(modelDTO.getId())
                 .title(modelDTO.getTitle())
                 .description(modelDTO.getDescription())
                 .topic(modelDTO.getTopic())
