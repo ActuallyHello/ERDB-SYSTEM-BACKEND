@@ -1,6 +1,7 @@
 package com.ustu.erdbsystem.ermodels.service.impl;
 
 import com.ustu.erdbsystem.ermodels.api.dto.RelationDTO;
+import com.ustu.erdbsystem.ermodels.exception.service.RelationCreationException;
 import com.ustu.erdbsystem.ermodels.exception.service.RelationDeleteException;
 import com.ustu.erdbsystem.ermodels.exception.validation.RelationDoesNotMatchEntityException;
 import com.ustu.erdbsystem.ermodels.service.RelationService;
@@ -43,6 +44,7 @@ public class RelationServiceImpl implements RelationService {
                 if (fromEntity != null && toEntity != null) break;
             }
             if (fromEntity == null || toEntity == null) {
+                log.error("ENTITIES DO NOT MATCH WITH RELATIONS!");
                 throw new RelationDoesNotMatchEntityException(
                         "Relation (entity1=%s/entity2=%s) does not match with entities in table!".formatted(
                                 relationDTO.getFromEntity(), relationDTO.getToEntity()
@@ -56,9 +58,15 @@ public class RelationServiceImpl implements RelationService {
                     .build()
             );
         }
-        relationRepo.saveAllAndFlush(relationList);
-        log.info("CREATED %d ENTITY RELATIONS".formatted(relationList.size()));
-        return relationList;
+        try {
+            relationRepo.saveAllAndFlush(relationList);
+            log.info("CREATED ENTITY RELATIONS (%d)".formatted(relationList.size()));
+            return relationList;
+        } catch (PersistenceException exception) {
+            log.error("ERROR WHEN CREATING RELATIONS: %s".formatted(exception.getMessage()));
+            throw new RelationCreationException(exception.getMessage(), exception);
+        }
+
     }
 
     @Override
@@ -86,7 +94,7 @@ public class RelationServiceImpl implements RelationService {
     @Transactional
     public List<Relation> getRelationsByEntityIds(List<Long> modelEntityIdList) {
         var relationList = relationRepo.findByModelEntity1IdOrModelEntity2IdInModelEntityIdList(modelEntityIdList);
-        log.info("GET %d RELATIONS".formatted(relationList.size()));
+        log.info("GET RELATIONS (%d)".formatted(relationList.size()));
         return relationList;
     }
 }
