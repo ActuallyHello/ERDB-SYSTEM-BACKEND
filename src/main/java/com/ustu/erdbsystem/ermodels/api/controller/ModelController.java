@@ -19,7 +19,8 @@ import com.ustu.erdbsystem.ermodels.exception.validation.EnumValueException;
 import com.ustu.erdbsystem.ermodels.service.ModelEntityAttributeService;
 import com.ustu.erdbsystem.ermodels.service.ModelService;
 import com.ustu.erdbsystem.ermodels.service.RelationService;
-import com.ustu.erdbsystem.persons.api.mapper.PersonCredentialsDTOMapper;
+import com.ustu.erdbsystem.persons.api.mapper.PersonDTOMapper;
+import com.ustu.erdbsystem.persons.service.PersonService;
 import com.ustu.erdbsystem.persons.store.repos.PersonRepo;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +40,7 @@ import java.util.List;
 public class ModelController {
 
     private ModelService modelService;
-    private PersonRepo personRepo; // TODO: change with service
+    private PersonService personService;
     private RelationService relationService;
     private ModelEntityAttributeService modelEntityAttributeService;
 
@@ -47,10 +48,10 @@ public class ModelController {
     public ResponseEntity<List<ModelPreviewDTO>> getAllPreviewModels() {
         var result = modelService.getAll().stream()
                 .map(model -> {
-                    var personCredentialsDTO = PersonCredentialsDTOMapper.makeDTO(model.getPerson());
+                    var personCredentialsDTO = PersonDTOMapper.makeDTO(model.getPerson());
                     var modelDTO = ModelDTOMapper.makeDTO(model);
                     return ModelPreviewDTO.builder()
-                            .personCredentialsDTO(personCredentialsDTO)
+                            .personDTO(personCredentialsDTO)
                             .modelDTO(modelDTO)
                             .build();
                 })
@@ -62,7 +63,7 @@ public class ModelController {
     public ResponseEntity<ModelDetailDTO> getModelDetailById(@PathVariable Long id) {
         var model = modelService.getById(id)
                 .orElseThrow(() -> new ModelNotFoundException("Model with id=%d was not found!".formatted(id)));
-        var personCredentialsDTO = PersonCredentialsDTOMapper.makeDTO(model.getPerson());
+        var personCredentialsDTO = PersonDTOMapper.makeDTO(model.getPerson());
         var modelDTO = ModelDTOMapper.makeDTO(model);
         var modelEntityDTOList = modelEntityAttributeService.getAllByModel(model).stream()
                 .map(ModelEntityDTOMapper::makeDTO)
@@ -77,14 +78,14 @@ public class ModelController {
                 .modelDTO(modelDTO)
                 .modelEntityDTOList(modelEntityDTOList)
                 .relationDTOList(relationDTOList)
-                .personCredentialsDTO(personCredentialsDTO)
+                .personDTO(personCredentialsDTO)
                 .build()
         );
     }
 
     @PostMapping
     public ResponseEntity<Long> createModel(@RequestBody CreateModelRequestDTO createModelRequestDTO) {
-        var person = personRepo.findById(createModelRequestDTO.getPersonId())
+        var person = personService.getById(createModelRequestDTO.getPersonId())
                 .orElseThrow(() -> new ModelOwnerNotFoundException("Person with id=%d was not found".formatted(createModelRequestDTO.getPersonId())));
         ModelDTO modelDTO;
         List<ModelEntityDTO> modelEntityDTOList;
