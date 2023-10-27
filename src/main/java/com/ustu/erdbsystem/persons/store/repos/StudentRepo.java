@@ -15,22 +15,25 @@ public interface StudentRepo extends JpaRepository<Student, Long> {
 
     @Query("""
             SELECT s FROM Student s
-                INNER JOIN FETCH Group
-            WHERE s.person.id = :personId
+                INNER JOIN FETCH s.group
+                INNER JOIN s.person p
+            WHERE p.id = :personId
             """)
     Optional<Student> findByPersonIdWithGroup(Long personId);
 
     @Query("""
             SELECT s FROM Student s
-                INNER JOIN FETCH Person
-            WHERE s.group.id = :groupId
+                INNER JOIN FETCH s.person
+                INNER JOIN s.group g
+            WHERE g.id = :groupId
             """)
     List<Student> findAllByGroupIdWithPerson(Long groupId);
 
     @Query("""
             SELECT s FROM Student s
-                INNER JOIN FETCH Person
-                INNER JOIN FETCH Group
+                INNER JOIN FETCH s.person
+                INNER JOIN FETCH s.group
+            WHERE s.id = :id
             """)
     Optional<Student> findByIdWithPersonAndGroup(Long id);
 }
