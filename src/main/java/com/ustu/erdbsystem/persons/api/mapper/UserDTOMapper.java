@@ -1,6 +1,8 @@
 package com.ustu.erdbsystem.persons.api.mapper;
 
 import com.ustu.erdbsystem.persons.api.dto.UserDTO;
+import com.ustu.erdbsystem.persons.api.dto.UserRestrictDTO;
+import com.ustu.erdbsystem.persons.api.dto.request.CreateUserRequestDTO;
 import com.ustu.erdbsystem.persons.store.models.User;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +13,16 @@ public class UserDTOMapper {
                 .id(user.getId())
                 .login(user.getLogin())
                 .email(user.getEmail())
+                .password(user.getPassword())
                 .isActive(user.getIsActive())
+                .build();
+    }
+
+    public static UserDTO makeDTO(CreateUserRequestDTO createUserRequestDTO) {
+        return UserDTO.builder()
+                .login(createUserRequestDTO.getLogin())
+                .email(createUserRequestDTO.getEmail())
+                .password(createUserRequestDTO.getPassword())
                 .build();
     }
 
@@ -19,6 +30,7 @@ public class UserDTOMapper {
         return User.builder()
                 .id(userDTO.getId())
                 .login(userDTO.getLogin())
+                .password(userDTO.getPassword())
                 .email(userDTO.getEmail())
                 .isActive(userDTO.getIsActive())
                 .build();
