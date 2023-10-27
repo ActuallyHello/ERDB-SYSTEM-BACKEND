@@ -53,6 +53,7 @@ public class UserServiceImpl implements UserService {
     public void delete(User user) {
         try {
             userRepo.delete(user);
+            userRepo.flush();
             log.info("USER WITH ID={} WAS DELETED", user.getId());
         } catch (PersistenceException exception) {
             log.error("CANNOT DELETE USER: {}", exception.getMessage());

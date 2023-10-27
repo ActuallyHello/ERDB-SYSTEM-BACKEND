@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -24,10 +25,17 @@ public class PersonServiceImpl implements PersonService {
     private PersonRepo personRepo;
 
     @Override
+    public List<Person> getAll() {
+        var personList = personRepo.findAll();
+        log.info("GET PERSONS ({})", personList.size());
+        return personList;
+    }
+
+    @Override
     @Transactional
     public Optional<Person> getById(Long id) {
         var person = personRepo.findById(id);
-        log.info("GET MODEL BY ID={}", id);
+        log.info("GET PERSON BY ID={}", id);
         return person;
     }
 
@@ -57,6 +65,7 @@ public class PersonServiceImpl implements PersonService {
     public void delete(Person person) {
         try {
             personRepo.delete(person);
+            personRepo.flush();
             log.info("PERSON WITH ID={} WAS DELETED", person.getId());
         } catch (PersistenceException exception) {
             log.error("CANNOT DELETE PERSON WITH ID={}! {}", person.getId(), exception.getMessage());

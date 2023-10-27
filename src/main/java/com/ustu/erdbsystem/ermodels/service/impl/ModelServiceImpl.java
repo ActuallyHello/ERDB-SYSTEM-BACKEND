@@ -69,6 +69,7 @@ public class ModelServiceImpl implements ModelService {
         }
         try {
             modelRepo.delete(model);
+            modelRepo.flush();
             log.info("MODEL WITH ID=%d WAS DELETED!".formatted(model.getId()));
         } catch (PersistenceException exception) {
             log.error("CANNOT DELETE MODEL WITH ID=%d! %s".formatted(model.getId(), exception));

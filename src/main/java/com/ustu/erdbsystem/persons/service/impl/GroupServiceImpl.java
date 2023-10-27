@@ -60,6 +60,7 @@ public class GroupServiceImpl implements GroupService {
     public void delete(Group group) {
         try {
             groupRepo.delete(group);
+            groupRepo.flush();
             log.info("GROUP WITH ID={} WAS DELETED", group.getId());
         } catch (PersistenceException exception) {
             log.error("CANNOT DELETE GROUP: {}", exception.getMessage());

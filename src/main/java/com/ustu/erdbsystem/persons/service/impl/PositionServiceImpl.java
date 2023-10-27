@@ -53,6 +53,7 @@ public class PositionServiceImpl implements PositionService {
     public void delete(Position position) {
         try {
             positionRepo.delete(position);
+            positionRepo.flush();
             log.info("POSITION WITH ID={} WAS DELETED", position.getId());
         } catch (PersistenceException exception) {
             log.error("CANNOT DELETE POSITION: {}", exception.getMessage());

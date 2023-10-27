@@ -83,6 +83,7 @@ public class RelationServiceImpl implements RelationService {
         );
         try {
             relationRepo.deleteAll(relationList);
+            relationRepo.flush();
             log.info("RELATIONS WERE DELETED FROM MODEL WITH ID=%d".formatted(model.getId()));
         } catch (PersistenceException exception) {
             log.error("CANNOT DELETE RELATIONS FROM MODEL WITH ID=%d! %s".formatted(model.getId(), exception));

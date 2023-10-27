@@ -68,6 +68,7 @@ public class TeacherServiceImpl implements TeacherService {
     public void delete(Teacher teacher) {
         try {
             teacherRepo.delete(teacher);
+            teacherRepo.flush();
             log.info("TEACHER WITH ID={} WAS DELETED", teacher.getId());
         } catch (PersistenceException exception) {
             log.error("CANNOT DELETE TEACHER: {}", exception.getMessage());
