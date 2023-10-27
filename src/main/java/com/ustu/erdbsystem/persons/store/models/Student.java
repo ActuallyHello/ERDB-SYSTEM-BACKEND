@@ -37,7 +37,7 @@ public class Student {
     private Long id;
 
     @ManyToOne(
-            fetch = FetchType.EAGER,
+            fetch = FetchType.LAZY,
             optional = false
     )
     private Group group;
