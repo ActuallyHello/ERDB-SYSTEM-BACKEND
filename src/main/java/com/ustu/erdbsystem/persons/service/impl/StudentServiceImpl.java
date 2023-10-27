@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -23,6 +24,13 @@ public class StudentServiceImpl implements StudentService {
     private StudentRepo studentRepo;
 
     @Override
+    public List<Student> getAllByGroupIdWithPerson(Long groupId) {
+        var studentList = studentRepo.findAllByGroupIdWithPerson(groupId);
+        log.info("GET STUDENTS BY GROUP WITH ID={} ({})", groupId, studentList.size());
+        return studentList;
+    }
+
+    @Override
     @Transactional
     public Optional<Student> getById(Long id) {
         var student = studentRepo.findById(id);
@@ -31,10 +39,17 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    public Optional<Student> getByIdWithPersonAndGroup(Long id) {
+        var student = studentRepo.findByIdWithPersonAndGroup(id);
+        log.info("GET STUDENT WITH ID={}", id);
+        return student;
+    }
+
+    @Override
     @Transactional
-    public Optional<Student> getByPerson(Person person) {
-        var student = studentRepo.findByPerson(person);
-        log.info("GET STUDENT BY PERSON WITH ID={}", person.getId());
+    public Optional<Student> getByPersonIdWithGroup(Long personId) {
+        var student = studentRepo.findByPersonIdWithGroup(personId);
+        log.info("GET STUDENT BY PERSON WITH ID={}", personId);
         return student;
     }
 
@@ -59,6 +74,7 @@ public class StudentServiceImpl implements StudentService {
     public void delete(Student student) {
         try {
             studentRepo.delete(student);
+            studentRepo.flush();
             log.info("STUDENT WITH ID={} WAS DELETED", student.getId());
         } catch (PersistenceException exception) {
             log.error("CANNOT DELETE STUDENT: {}", exception.getMessage());
