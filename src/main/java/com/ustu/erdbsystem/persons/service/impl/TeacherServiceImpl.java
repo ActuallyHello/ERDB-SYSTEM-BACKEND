@@ -32,10 +32,31 @@ public class TeacherServiceImpl implements TeacherService {
     }
 
     @Override
+    public List<Teacher> getAllByPositionId(Long positionId) {
+        var teacherList = teacherRepo.findAllByPositionIdWithPerson(positionId);
+        log.info("GET TEACHER BY POSITION WITH ID={} ({})", positionId, teacherList.size());
+        return teacherList;
+    }
+
+    @Override
     @Transactional
     public Optional<Teacher> getById(Long id) {
         var teacher = teacherRepo.findById(id);
         log.info("GET TEACHER WITH ID={}", id);
+        return teacher;
+    }
+
+    @Override
+    public Optional<Teacher> getByIdWithPersonAndPosition(Long id) {
+        var teacher = teacherRepo.findByIdWithPersonAndPosition(id);
+        log.info("GET TEACHER WITH ID={}", id);
+        return teacher;
+    }
+
+    @Override
+    public Optional<Teacher> getByPersonIdWithPosition(Long personId) {
+        var teacher = teacherRepo.findByPersonIdWithPosition(personId);
+        log.info("GET TEACHER BY PERSON WITH ID={}", personId);
         return teacher;
     }
 

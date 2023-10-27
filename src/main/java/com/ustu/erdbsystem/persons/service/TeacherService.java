@@ -10,7 +10,13 @@ import java.util.Optional;
 public interface TeacherService {
     List<Teacher> getAll();
 
+    List<Teacher> getAllByPositionId(Long positionId);
+
     Optional<Teacher> getById(Long id);
+
+    Optional<Teacher> getByIdWithPersonAndPosition(Long id);
+
+    Optional<Teacher> getByPersonIdWithPosition(Long personId);
 
     Optional<Teacher> getByPerson(Person person);
 
