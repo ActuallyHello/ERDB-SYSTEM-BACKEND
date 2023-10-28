@@ -10,9 +10,18 @@ import java.util.List;
 @Repository
 public interface ModelRepo extends JpaRepository<Model, Long> {
 
-    @Override
-    @Query("SELECT m FROM Model m INNER JOIN FETCH m.person")
-    List<Model> findAll();
+    @Query("""
+            SELECT m FROM Model m
+                INNER JOIN FETCH m.person
+            """)
+    List<Model> findAllWithPerson();
+
+    @Query("""
+            SELECT m FROM Model m
+                INNER JOIN FETCH m.person
+            WHERE m.id IN :idList
+            """)
+    List<Model> findAllByIdInRangeWithPerson(List<Long> idList);
 
     List<Model> findByIdIn(List<Long> idList);
 }
