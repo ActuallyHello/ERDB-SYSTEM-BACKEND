@@ -1,6 +1,8 @@
 package com.ustu.erdbsystem.ermodels.exception.response;
 
-public class ModelValidationException extends RuntimeException {
+import com.ustu.erdbsystem.ermodels.exception.ServerException;
+
+public class ModelValidationException extends RuntimeException implements ServerException {
     public ModelValidationException(String message) {
         super(message);
     }

@@ -1,6 +1,8 @@
 package com.ustu.erdbsystem.ermodels.exception.response;
 
-public class ModelOwnerNotFoundException extends RuntimeException {
+import com.ustu.erdbsystem.ermodels.exception.NotFoundException;
+
+public class ModelOwnerNotFoundException extends RuntimeException implements NotFoundException {
     public ModelOwnerNotFoundException(String message) {
         super(message);
     }

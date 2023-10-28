@@ -1,13 +1,19 @@
 package com.ustu.erdbsystem.ermodels.exception;
 
-import com.ustu.erdbsystem.ermodels.exception.response.ModelDBException;
 import com.ustu.erdbsystem.ermodels.exception.response.ModelNotFoundException;
 import com.ustu.erdbsystem.ermodels.exception.response.ModelOwnerNotFoundException;
+import com.ustu.erdbsystem.ermodels.exception.response.ModelServerException;
 import com.ustu.erdbsystem.ermodels.exception.response.ModelValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestControllerAdvice
 public class ModelExceptionHandler {
@@ -15,29 +21,13 @@ public class ModelExceptionHandler {
     @ExceptionHandler(
             value = {
                     ModelNotFoundException.class,
-            }
-    )
-    public ResponseEntity<Object> handleModelNotFoundException(
-            ModelNotFoundException modelNotFoundException) {
-        var modelException = new ModelException(
-                modelNotFoundException.getMessage(),
-                modelNotFoundException.getClass().getSimpleName(),
-                HttpStatus.NOT_FOUND,
-                HttpStatus.NOT_FOUND.value()
-        );
-        return new ResponseEntity<>(modelException, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(
-            value = {
                     ModelOwnerNotFoundException.class
             }
     )
-    public ResponseEntity<Object> handleModelOwnerNotFoundException(
-            ModelOwnerNotFoundException modelOwnerNotFoundException) {
+    public ResponseEntity<Object> handleNotFoundException(NotFoundException notFoundException) {
         var modelException = new ModelException(
-                modelOwnerNotFoundException.getMessage(),
-                modelOwnerNotFoundException.getClass().getSimpleName(),
+                notFoundException.getMessage(),
+                notFoundException.getClass().getSimpleName(),
                 HttpStatus.NOT_FOUND,
                 HttpStatus.NOT_FOUND.value()
         );
@@ -46,14 +36,14 @@ public class ModelExceptionHandler {
 
     @ExceptionHandler(
             value = {
-                    ModelValidationException.class,
+                    ModelServerException.class,
+                    ModelValidationException.class
             }
     )
-    public ResponseEntity<Object> handleModelValidationException(
-            ModelValidationException modelValidationException) {
+    public ResponseEntity<Object> handleServerException(ServerException serverException) {
         var modelException = new ModelException(
-                modelValidationException.getMessage(),
-                modelValidationException.getClass().getSimpleName(),
+                serverException.getMessage(),
+                serverException.getClass().getSimpleName(),
                 HttpStatus.BAD_REQUEST,
                 HttpStatus.BAD_REQUEST.value()
         );
@@ -62,14 +52,18 @@ public class ModelExceptionHandler {
 
     @ExceptionHandler(
             value = {
-                    ModelDBException.class
+                    MethodArgumentNotValidException.class
             }
     )
-    public ResponseEntity<Object> handleModelDBException(
-            ModelDBException modelDBException) {
+    public ResponseEntity<Object> handleValidationException(MethodArgumentNotValidException methodArgumentNotValidException) {
+        Map<String, List<String>> errorMap = new HashMap<>();
+        for (var fieldError : methodArgumentNotValidException.getBindingResult().getFieldErrors()) {
+            errorMap.putIfAbsent(fieldError.getField(), new ArrayList<>());
+            errorMap.get(fieldError.getField()).add(fieldError.getDefaultMessage());
+        }
         var modelException = new ModelException(
-                modelDBException.getMessage(),
-                modelDBException.getClass().getSimpleName(),
+                errorMap,
+                methodArgumentNotValidException.getClass().getSimpleName(),
                 HttpStatus.BAD_REQUEST,
                 HttpStatus.BAD_REQUEST.value()
         );
