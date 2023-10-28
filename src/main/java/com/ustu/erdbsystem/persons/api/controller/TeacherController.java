@@ -1,8 +1,8 @@
 package com.ustu.erdbsystem.persons.api.controller;
 
 import com.ustu.erdbsystem.persons.api.dto.TeacherDTO;
-import com.ustu.erdbsystem.persons.api.dto.TeacherWithPersonDTO;
-import com.ustu.erdbsystem.persons.api.dto.TeacherWithPositionDTO;
+import com.ustu.erdbsystem.persons.api.dto.response.TeacherWithPersonDTO;
+import com.ustu.erdbsystem.persons.api.dto.response.TeacherWithPositionDTO;
 import com.ustu.erdbsystem.persons.api.dto.request.CreateTeacherRequestDTO;
 import com.ustu.erdbsystem.persons.api.mapper.PersonDTOMapper;
 import com.ustu.erdbsystem.persons.api.mapper.PositionDTOMapper;
@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @AllArgsConstructor
 @Slf4j
@@ -72,14 +73,14 @@ public class TeacherController {
     }
 
     @PostMapping("")
-    public ResponseEntity<Long> createTeacher(@RequestBody CreateTeacherRequestDTO createTeacherRequestDTO) {
+    public ResponseEntity<Object> createTeacher(@RequestBody CreateTeacherRequestDTO createTeacherRequestDTO) {
         var person = personService.getById(createTeacherRequestDTO.getPersonId())
                 .orElseThrow(() -> new PersonNotFoundException("Person with id=%d was not found!".formatted(createTeacherRequestDTO.getPersonId())));
         var position = positionService.getById(createTeacherRequestDTO.getPositionId())
                 .orElseThrow(() -> new PositionNotFoundException("Position with id=%d was not found!".formatted(createTeacherRequestDTO.getPositionId())));
         try {
             var teacher = teacherService.create(person, position);
-            return ResponseEntity.ok(teacher.getId());
+            return ResponseEntity.ok(Map.of("teacherId", teacher.getId()));
         } catch (PositionCreationException exception) {
             throw new PositionDBException("Error when creating teacher! " + exception.getMessage(), exception);
         }

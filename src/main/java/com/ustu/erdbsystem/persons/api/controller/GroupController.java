@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @AllArgsConstructor
 @Slf4j
@@ -46,11 +48,11 @@ public class GroupController {
     }
 
     @PostMapping("")
-    public ResponseEntity<Long> createGroup(@RequestBody CreateGroupRequestDTO createGroupRequestDTO) {
+    public ResponseEntity<Object> createGroup(@RequestBody CreateGroupRequestDTO createGroupRequestDTO) {
         var groupDTO = GroupDTOMapper.makeDTO(createGroupRequestDTO);
         try {
             var group = groupService.create(groupDTO);
-            return ResponseEntity.ok(group.getId());
+            return ResponseEntity.ok(Map.of("groupId", group.getId()));
         } catch (GroupCreationException exception) {
             throw new GroupDBException("Error when creating group! " + exception.getMessage(), exception);
         }

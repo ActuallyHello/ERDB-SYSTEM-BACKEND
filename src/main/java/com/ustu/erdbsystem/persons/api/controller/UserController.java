@@ -1,7 +1,6 @@
 package com.ustu.erdbsystem.persons.api.controller;
 
-import com.ustu.erdbsystem.persons.api.dto.UserDTO;
-import com.ustu.erdbsystem.persons.api.dto.UserRestrictDTO;
+import com.ustu.erdbsystem.persons.api.dto.response.UserRestrictDTO;
 import com.ustu.erdbsystem.persons.api.dto.request.CreateUserRequestDTO;
 import com.ustu.erdbsystem.persons.api.mapper.UserDTOMapper;
 import com.ustu.erdbsystem.persons.api.mapper.UserRestrictDTOMapper;
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @AllArgsConstructor
 @Slf4j
@@ -46,11 +46,11 @@ public class UserController {
     }
 
     @PostMapping("")
-    public ResponseEntity<Long> createUser(@RequestBody CreateUserRequestDTO createUserRequestDTO) {
+    public ResponseEntity<Object> createUser(@RequestBody CreateUserRequestDTO createUserRequestDTO) {
         var userDTO = UserDTOMapper.makeDTO(createUserRequestDTO);
         try {
             var user = userService.create(userDTO);
-            return ResponseEntity.ok(user.getId());
+            return ResponseEntity.ok(Map.of("userId", user.getId()));
         } catch (UserCreationException exception) {
             throw new UserDBException("Error when creating user! " + exception.getMessage(), exception);
         }

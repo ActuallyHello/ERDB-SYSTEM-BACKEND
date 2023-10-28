@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @AllArgsConstructor
 @Slf4j
@@ -51,7 +52,7 @@ public class PersonController {
     }
 
     @PostMapping("")
-    public ResponseEntity<Long> createPerson(@RequestBody CreatePersonRequestDTO createPersonRequestDTO) {
+    public ResponseEntity<Object> createPerson(@RequestBody CreatePersonRequestDTO createPersonRequestDTO) {
         var user = userService.getById(createPersonRequestDTO.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("User with id=%d was not found!".formatted(createPersonRequestDTO.getUserId())));
         PersonDTO personDTO;
@@ -62,7 +63,7 @@ public class PersonController {
         }
         try {
             var person = personService.create(personDTO, user);
-            return ResponseEntity.ok(person.getId());
+            return ResponseEntity.ok(Map.of("personId", person.getId()));
         } catch (PersonCreationException exception) {
             throw new PersonDBException("Error when creating person! " + exception.getMessage(), exception);
         }

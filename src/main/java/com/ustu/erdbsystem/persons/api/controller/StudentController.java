@@ -1,8 +1,8 @@
 package com.ustu.erdbsystem.persons.api.controller;
 
 import com.ustu.erdbsystem.persons.api.dto.StudentDTO;
-import com.ustu.erdbsystem.persons.api.dto.StudentWithGroupDTO;
-import com.ustu.erdbsystem.persons.api.dto.StudentWithPersonDTO;
+import com.ustu.erdbsystem.persons.api.dto.response.StudentWithGroupDTO;
+import com.ustu.erdbsystem.persons.api.dto.response.StudentWithPersonDTO;
 import com.ustu.erdbsystem.persons.api.dto.request.CreateStudentRequestDTO;
 import com.ustu.erdbsystem.persons.api.mapper.GroupDTOMapper;
 import com.ustu.erdbsystem.persons.api.mapper.PersonDTOMapper;
@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @AllArgsConstructor
 @Slf4j
@@ -72,14 +73,14 @@ public class StudentController {
     }
 
     @PostMapping("")
-    public ResponseEntity<Long> createStudent(@RequestBody CreateStudentRequestDTO createStudentRequestDTO) {
+    public ResponseEntity<Object> createStudent(@RequestBody CreateStudentRequestDTO createStudentRequestDTO) {
         var group = groupService.getById(createStudentRequestDTO.getGroupId())
                 .orElseThrow(() -> new GroupNotFoundException("Group with id=%d was not found!".formatted(createStudentRequestDTO.getGroupId())));
         var person = personService.getById(createStudentRequestDTO.getPersonId())
                 .orElseThrow(() -> new PersonNotFoundException("Person with id=%d was not found!".formatted(createStudentRequestDTO.getPersonId())));
         try {
             var student = studentService.create(person, group);
-            return ResponseEntity.ok(student.getId());
+            return ResponseEntity.ok(Map.of("studentId", student.getId()));
         } catch (StudentCreationException exception) {
             throw new StudentDBException("Error when creating student! " + exception.getMessage(), exception);
         }

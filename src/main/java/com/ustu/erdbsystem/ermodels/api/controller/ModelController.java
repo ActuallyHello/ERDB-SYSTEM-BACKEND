@@ -4,12 +4,14 @@ import com.ustu.erdbsystem.ermodels.api.dto.ModelDTO;
 import com.ustu.erdbsystem.ermodels.api.dto.ModelEntityDTO;
 import com.ustu.erdbsystem.ermodels.api.dto.RelationDTO;
 import com.ustu.erdbsystem.ermodels.api.dto.response.ModelDetailDTO;
-import com.ustu.erdbsystem.ermodels.api.dto.response.ModelPreviewDTO;
 import com.ustu.erdbsystem.ermodels.api.dto.request.CreateModelRequestDTO;
+import com.ustu.erdbsystem.ermodels.api.dto.response.ModelWithPersonDTO;
 import com.ustu.erdbsystem.ermodels.api.mapper.ModelDTOMapper;
+import com.ustu.erdbsystem.ermodels.api.mapper.ModelDetailDTOMapper;
 import com.ustu.erdbsystem.ermodels.api.mapper.ModelEntityDTOMapper;
+import com.ustu.erdbsystem.ermodels.api.mapper.ModelWithPersonDTOMapper;
 import com.ustu.erdbsystem.ermodels.api.mapper.RelationDTOMapper;
-import com.ustu.erdbsystem.ermodels.exception.response.ModelDBException;
+import com.ustu.erdbsystem.ermodels.exception.response.ModelServerException;
 import com.ustu.erdbsystem.ermodels.exception.response.ModelNotFoundException;
 import com.ustu.erdbsystem.ermodels.exception.response.ModelOwnerNotFoundException;
 import com.ustu.erdbsystem.ermodels.exception.response.ModelValidationException;
@@ -21,7 +23,7 @@ import com.ustu.erdbsystem.ermodels.service.ModelService;
 import com.ustu.erdbsystem.ermodels.service.RelationService;
 import com.ustu.erdbsystem.persons.api.mapper.PersonDTOMapper;
 import com.ustu.erdbsystem.persons.service.PersonService;
-import com.ustu.erdbsystem.persons.store.repos.PersonRepo;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @AllArgsConstructor
 @RestController
@@ -45,26 +48,21 @@ public class ModelController {
     private ModelEntityAttributeService modelEntityAttributeService;
 
     @GetMapping("")
-    public ResponseEntity<List<ModelPreviewDTO>> getAllPreviewModels() {
-        var result = modelService.getAll().stream()
-                .map(model -> {
-                    var personCredentialsDTO = PersonDTOMapper.makeDTO(model.getPerson());
-                    var modelDTO = ModelDTOMapper.makeDTO(model);
-                    return ModelPreviewDTO.builder()
-                            .personDTO(personCredentialsDTO)
-                            .modelDTO(modelDTO)
-                            .build();
-                })
+    public ResponseEntity<List<ModelWithPersonDTO>> getModelsWithPerson() {
+        var modelWithPersonDTOList = modelService.getAllWithPerson().stream()
+                .map(model -> ModelWithPersonDTOMapper.makeDTO(
+                        model,
+                        PersonDTOMapper.makeDTO(model.getPerson())
+                ))
                 .toList();
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(modelWithPersonDTOList);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ModelDetailDTO> getModelDetailById(@PathVariable Long id) {
         var model = modelService.getById(id)
                 .orElseThrow(() -> new ModelNotFoundException("Model with id=%d was not found!".formatted(id)));
-        var personCredentialsDTO = PersonDTOMapper.makeDTO(model.getPerson());
-        var modelDTO = ModelDTOMapper.makeDTO(model);
+        var personDTO = PersonDTOMapper.makeDTO(model.getPerson());
         var modelEntityDTOList = modelEntityAttributeService.getAllByModel(model).stream()
                 .map(ModelEntityDTOMapper::makeDTO)
                 .toList();
@@ -74,17 +72,13 @@ public class ModelController {
         var relationDTOList = relationService.getRelationsByEntityIds(modelEntityIdList).stream()
                 .map(RelationDTOMapper::makeDTO)
                 .toList();
-        return ResponseEntity.ok(ModelDetailDTO.builder()
-                .modelDTO(modelDTO)
-                .modelEntityDTOList(modelEntityDTOList)
-                .relationDTOList(relationDTOList)
-                .personDTO(personCredentialsDTO)
-                .build()
+        return ResponseEntity.ok(
+                ModelDetailDTOMapper.makeDTO(model, personDTO, modelEntityDTOList, relationDTOList)
         );
     }
 
     @PostMapping
-    public ResponseEntity<Long> createModel(@RequestBody CreateModelRequestDTO createModelRequestDTO) {
+    public ResponseEntity<Object> createModel(@RequestBody @Valid CreateModelRequestDTO createModelRequestDTO) {
         var person = personService.getById(createModelRequestDTO.getPersonId())
                 .orElseThrow(() -> new ModelOwnerNotFoundException("Person with id=%d was not found".formatted(createModelRequestDTO.getPersonId())));
         ModelDTO modelDTO;
@@ -98,15 +92,15 @@ public class ModelController {
             relationDTOList = createModelRequestDTO.getRelationList().stream()
                     .map(RelationDTOMapper::makeDTO)
                     .toList();
-        } catch (IllegalArgumentException | EnumValueException exception) {
+        } catch (EnumValueException exception) { // TODO JSON VALIDATION
             throw new ModelValidationException("Validation error! " + exception.getMessage(), exception);
         }
 
         try {
             var model = modelService.create(person, modelDTO, modelEntityDTOList, relationDTOList);
-            return ResponseEntity.ok(model.getId());
+            return ResponseEntity.ok(Map.of("modelId", model.getId()));
         } catch (ModelCreationException exception) {
-            throw new ModelDBException("Error when creating model! " + exception.getMessage(), exception);
+            throw new ModelServerException("Error when creating model! " + exception.getMessage(), exception);
         }
     }
 
@@ -118,7 +112,7 @@ public class ModelController {
             modelService.deleteModel(model);
             return ResponseEntity.noContent().build();
         } catch (ModelDeleteException exception) {
-            throw new ModelDBException("Error when deleting model! " + exception.getMessage(), exception);
+            throw new ModelServerException("Error when deleting model! " + exception.getMessage(), exception);
         }
     }
 }
