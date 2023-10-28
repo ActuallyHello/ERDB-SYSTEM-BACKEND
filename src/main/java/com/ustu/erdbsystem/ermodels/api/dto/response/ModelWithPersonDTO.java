@@ -6,12 +6,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 @Getter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ModelPreviewDTO {
-    private ModelDTO modelDTO;
+@SuperBuilder
+public class ModelWithPersonDTO extends ModelDTO {
     private PersonDTO personDTO;
 }

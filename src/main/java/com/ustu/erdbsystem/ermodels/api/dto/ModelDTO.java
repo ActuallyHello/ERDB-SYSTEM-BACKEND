@@ -13,8 +13,7 @@ import java.time.Instant;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-@ToString
+@SuperBuilder
 public class ModelDTO {
     private Long id;
     private String title;
