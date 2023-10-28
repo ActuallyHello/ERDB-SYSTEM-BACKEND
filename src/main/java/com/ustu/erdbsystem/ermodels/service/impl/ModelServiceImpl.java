@@ -37,16 +37,16 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     @Transactional
-    public List<Model> getAll() {
-        var modelList = modelRepo.findAll();
+    public List<Model> getAllWithPerson() {
+        var modelList = modelRepo.findAllWithPerson();
         log.info("GET MODELS (%d)".formatted(modelList.size()));
         return modelList;
     }
 
     @Override
     @Transactional
-    public List<Model> getAll(List<Long> idList) {
-        var modelList = modelRepo.findByIdIn(idList);
+    public List<Model> getAllWithPerson(List<Long> idList) {
+        var modelList = modelRepo.findAllByIdInRangeWithPerson(idList);
         log.info("GET MODELS (%d)".formatted(modelList.size()));
         return modelList;
     }

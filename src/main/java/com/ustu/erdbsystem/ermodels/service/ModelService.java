@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ModelService {
-    List<Model> getAll();
+    List<Model> getAllWithPerson();
 
-    List<Model> getAll(List<Long> idList);
+    List<Model> getAllWithPerson(List<Long> idList);
 
     Optional<Model> getById(Long id);
 
