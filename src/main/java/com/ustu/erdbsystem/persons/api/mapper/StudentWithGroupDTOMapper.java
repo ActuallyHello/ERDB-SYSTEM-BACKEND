@@ -1,7 +1,7 @@
 package com.ustu.erdbsystem.persons.api.mapper;
 
 import com.ustu.erdbsystem.persons.api.dto.GroupDTO;
-import com.ustu.erdbsystem.persons.api.dto.StudentWithGroupDTO;
+import com.ustu.erdbsystem.persons.api.dto.response.StudentWithGroupDTO;
 import com.ustu.erdbsystem.persons.store.models.Student;
 
 public class StudentWithGroupDTOMapper {

@@ -1,4 +1,4 @@
-package com.ustu.erdbsystem.persons.api.dto;
+package com.ustu.erdbsystem.persons.api.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

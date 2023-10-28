@@ -1,10 +1,8 @@
 package com.ustu.erdbsystem.persons.api.mapper;
 
 import com.ustu.erdbsystem.persons.api.dto.UserDTO;
-import com.ustu.erdbsystem.persons.api.dto.UserRestrictDTO;
 import com.ustu.erdbsystem.persons.api.dto.request.CreateUserRequestDTO;
 import com.ustu.erdbsystem.persons.store.models.User;
-import org.springframework.stereotype.Component;
 
 public class UserDTOMapper {
 

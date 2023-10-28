@@ -1,7 +1,7 @@
 package com.ustu.erdbsystem.persons.api.mapper;
 
 import com.ustu.erdbsystem.persons.api.dto.PositionDTO;
-import com.ustu.erdbsystem.persons.api.dto.TeacherWithPositionDTO;
+import com.ustu.erdbsystem.persons.api.dto.response.TeacherWithPositionDTO;
 import com.ustu.erdbsystem.persons.store.models.Teacher;
 
 public class TeacherWithPositionDTOMapper {
