@@ -28,7 +28,7 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = {"password", "person"})
+@ToString(exclude = {"password"})
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name="_user")
