@@ -17,7 +17,7 @@ public enum AttributeType {
                 return at;
             }
         }
-        throw new EnumValueException("NO SUCH ENUM AttributeType WITH VALUE \"%s\"!".formatted(shortAttributePower));
+        throw new EnumValueException("No such enum AttributeType with value '%s'! [ValidationException]".formatted(shortAttributePower));
     }
 
     public String getValue() {

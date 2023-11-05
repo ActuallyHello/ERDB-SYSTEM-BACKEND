@@ -11,16 +11,17 @@ public enum PersonType {
 
     private final String personType;
 
-    public static PersonType fromString(String shortPower) {
+    public static PersonType fromString(String personType) {
         for (var p : PersonType.values()) {
-            if (p.personType.equalsIgnoreCase(shortPower)) {
+            if (p.personType.equalsIgnoreCase(personType)) {
                 return p;
             }
         }
-        throw new EnumValueException("NO SUCH ENUM POWER WITH VALUE \"%s\"!".formatted(shortPower));
+        throw new EnumValueException("No such enum PersonType with value '%s'! [ValidationException]".formatted(personType));
     }
 
     public String getValue() {
+        PersonType.valueOf("string");
         return personType;
     }
 }

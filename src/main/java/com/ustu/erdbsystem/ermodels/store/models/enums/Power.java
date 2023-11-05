@@ -17,7 +17,7 @@ public enum Power {
                 return p;
             }
         }
-        throw new EnumValueException("NO SUCH ENUM POWER WITH VALUE \"%s\"!".formatted(shortPower));
+        throw new EnumValueException("No such enum POWER with value '%s'! [ValidationException]".formatted(shortPower));
     }
 
     public String getValue() {
