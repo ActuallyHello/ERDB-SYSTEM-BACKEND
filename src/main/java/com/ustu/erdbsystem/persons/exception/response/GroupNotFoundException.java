@@ -1,6 +1,8 @@
 package com.ustu.erdbsystem.persons.exception.response;
 
-public class GroupNotFoundException extends RuntimeException {
+import com.ustu.erdbsystem.persons.exception.NotFoundException;
+
+public class GroupNotFoundException extends RuntimeException implements NotFoundException {
     public GroupNotFoundException(String message) {
         super(message);
     }

@@ -1,6 +1,8 @@
 package com.ustu.erdbsystem.persons.exception.response;
 
-public class TeacherNotFoundException extends RuntimeException {
+import com.ustu.erdbsystem.persons.exception.NotFoundException;
+
+public class TeacherNotFoundException extends RuntimeException implements NotFoundException {
     public TeacherNotFoundException(String message) {
         super(message);
     }

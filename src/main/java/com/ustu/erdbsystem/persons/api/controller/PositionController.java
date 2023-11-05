@@ -3,11 +3,12 @@ package com.ustu.erdbsystem.persons.api.controller;
 import com.ustu.erdbsystem.persons.api.dto.PositionDTO;
 import com.ustu.erdbsystem.persons.api.dto.request.CreatePositionRequestDTO;
 import com.ustu.erdbsystem.persons.api.mapper.PositionDTOMapper;
-import com.ustu.erdbsystem.persons.exception.response.PositionDBException;
+import com.ustu.erdbsystem.persons.exception.response.PositionServerException;
 import com.ustu.erdbsystem.persons.exception.response.PositionNotFoundException;
 import com.ustu.erdbsystem.persons.exception.service.PositionCreationException;
 import com.ustu.erdbsystem.persons.exception.service.PositionDeleteException;
 import com.ustu.erdbsystem.persons.service.PositionService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -39,13 +40,13 @@ public class PositionController {
     }
 
     @PostMapping("")
-    public ResponseEntity<Object> createPosition(@RequestBody CreatePositionRequestDTO createPositionRequestDTO) {
+    public ResponseEntity<Object> createPosition(@RequestBody @Valid CreatePositionRequestDTO createPositionRequestDTO) {
         var positionDTO = PositionDTOMapper.makeDTO(createPositionRequestDTO);
         try {
             var position = positionService.create(positionDTO);
             return ResponseEntity.ok(Map.of("positionId", position.getId()));
         } catch (PositionCreationException exception) {
-            throw new PositionDBException("Error when creating position! " + exception.getMessage(), exception);
+            throw new PositionServerException(exception.getMessage(), exception);
         }
     }
 
@@ -57,7 +58,7 @@ public class PositionController {
             positionService.delete(position);
             return ResponseEntity.noContent().build();
         } catch (PositionDeleteException exception) {
-            throw new PositionDBException("Error when deleting position! " + exception.getMessage(), exception);
+            throw new PositionServerException(exception.getMessage(), exception);
         }
     }
 }

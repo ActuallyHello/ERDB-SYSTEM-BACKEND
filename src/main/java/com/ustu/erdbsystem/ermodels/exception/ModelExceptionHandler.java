@@ -6,6 +6,7 @@ import com.ustu.erdbsystem.ermodels.exception.response.ModelServerException;
 import com.ustu.erdbsystem.ermodels.exception.response.ModelValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class ModelExceptionHandler {
@@ -56,11 +58,14 @@ public class ModelExceptionHandler {
             }
     )
     public ResponseEntity<Object> handleValidationException(MethodArgumentNotValidException methodArgumentNotValidException) {
-        Map<String, List<String>> errorMap = new HashMap<>();
-        for (var fieldError : methodArgumentNotValidException.getBindingResult().getFieldErrors()) {
-            errorMap.putIfAbsent(fieldError.getField(), new ArrayList<>());
-            errorMap.get(fieldError.getField()).add(fieldError.getDefaultMessage());
-        }
+        Map<String, List<String>> errorMap = methodArgumentNotValidException.getBindingResult().getFieldErrors()
+                .stream()
+                .collect(
+                        Collectors.groupingBy(
+                                FieldError::getField,
+                                Collectors.mapping(FieldError::getDefaultMessage, Collectors.toList())
+                        )
+                );
         var modelException = new ModelException(
                 errorMap,
                 methodArgumentNotValidException.getClass().getSimpleName(),

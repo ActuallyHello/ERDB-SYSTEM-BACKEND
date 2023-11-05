@@ -3,11 +3,12 @@ package com.ustu.erdbsystem.persons.api.controller;
 import com.ustu.erdbsystem.persons.api.dto.GroupDTO;
 import com.ustu.erdbsystem.persons.api.dto.request.CreateGroupRequestDTO;
 import com.ustu.erdbsystem.persons.api.mapper.GroupDTOMapper;
-import com.ustu.erdbsystem.persons.exception.response.GroupDBException;
+import com.ustu.erdbsystem.persons.exception.response.GroupServerException;
 import com.ustu.erdbsystem.persons.exception.response.GroupNotFoundException;
 import com.ustu.erdbsystem.persons.exception.service.GroupCreationException;
 import com.ustu.erdbsystem.persons.exception.service.GroupDeleteException;
 import com.ustu.erdbsystem.persons.service.GroupService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -15,11 +16,11 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,13 +49,13 @@ public class GroupController {
     }
 
     @PostMapping("")
-    public ResponseEntity<Object> createGroup(@RequestBody CreateGroupRequestDTO createGroupRequestDTO) {
+    public ResponseEntity<Object> createGroup(@RequestBody @Valid CreateGroupRequestDTO createGroupRequestDTO) {
         var groupDTO = GroupDTOMapper.makeDTO(createGroupRequestDTO);
         try {
             var group = groupService.create(groupDTO);
             return ResponseEntity.ok(Map.of("groupId", group.getId()));
         } catch (GroupCreationException exception) {
-            throw new GroupDBException("Error when creating group! " + exception.getMessage(), exception);
+            throw new GroupServerException(exception.getMessage(), exception);
         }
     }
 
@@ -66,7 +67,22 @@ public class GroupController {
             groupService.delete(group);
             return ResponseEntity.noContent().build();
         } catch (GroupDeleteException exception) {
-            throw new GroupDBException("Error when deleting group! " + exception.getMessage(), exception);
+            throw new GroupServerException(exception.getMessage(), exception);
         }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<GroupDTO> updateGroupById(@PathVariable Long id,
+                                                    @RequestBody @Valid CreateGroupRequestDTO createGroupRequestDTO) {
+        var group = groupService.getById(id)
+                .orElseThrow(() -> new GroupNotFoundException("Group with id=%d was not found!".formatted(id)));
+        group.setTitle(createGroupRequestDTO.getTitle());
+        try {
+            group = groupService.update(group);
+        } catch (GroupDeleteException exception) {
+            throw new GroupServerException(exception.getMessage(), exception);
+        }
+        var groupDTO = GroupDTOMapper.makeDTO(group);
+        return ResponseEntity.ok(groupDTO);
     }
 }

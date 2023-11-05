@@ -14,6 +14,7 @@ import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -44,9 +45,9 @@ public class RelationServiceImpl implements RelationService {
                 if (fromEntity != null && toEntity != null) break;
             }
             if (fromEntity == null || toEntity == null) {
-                log.error("ENTITIES DO NOT MATCH WITH RELATIONS!");
+                log.error("RELATION WITH fromEntity={} AND toEntity={} DOES NOT MATCH WITH ENTITIES!", relationDTO.getFromEntity(), relationDTO.getToEntity());
                 throw new RelationDoesNotMatchEntityException(
-                        "Relation (entity1=%s/entity2=%s) does not match with entities in table!".formatted(
+                        "Relation with fromEntity=%s and toEntity=%s does not match with entities in table! [ValidationException]".formatted(
                                 relationDTO.getFromEntity(), relationDTO.getToEntity()
                         )
                 );
@@ -60,11 +61,11 @@ public class RelationServiceImpl implements RelationService {
         }
         try {
             relationRepo.saveAllAndFlush(relationList);
-            log.info("CREATED ENTITY RELATIONS (%d)".formatted(relationList.size()));
+            log.info("CREATED ENTITY RELATIONS ({})", relationList.size());
             return relationList;
-        } catch (PersistenceException exception) {
-            log.error("ERROR WHEN CREATING RELATIONS: %s".formatted(exception.getMessage()));
-            throw new RelationCreationException(exception.getMessage(), exception);
+        } catch (DataIntegrityViolationException | PersistenceException exception) {
+            log.error("ERROR WHEN CREATING RELATIONS! {}", exception.getMessage());
+            throw new RelationCreationException("Error when creating relations! [DatabaseException]", exception);
         }
 
     }
@@ -74,7 +75,7 @@ public class RelationServiceImpl implements RelationService {
     public void deleteRelationsFromModel(Model model) {
         var modelEntityList = model.getModelEntityList();
         if (modelEntityList == null || modelEntityList.isEmpty()) {
-            log.warn("THERE ARE NO ENTITIES IN MODEL WITH ID=%d".formatted(model.getId()));
+            log.warn("THERE ARE NO ENTITIES IN MODEL WITH ID={}", model.getId());
             return;
         }
         var relationList = this.getRelationsByEntityIds(modelEntityList.stream()
@@ -84,10 +85,10 @@ public class RelationServiceImpl implements RelationService {
         try {
             relationRepo.deleteAll(relationList);
             relationRepo.flush();
-            log.info("RELATIONS WERE DELETED FROM MODEL WITH ID=%d".formatted(model.getId()));
-        } catch (PersistenceException exception) {
-            log.error("CANNOT DELETE RELATIONS FROM MODEL WITH ID=%d! %s".formatted(model.getId(), exception));
-            throw new RelationDeleteException(exception.getMessage(), exception);
+            log.info("RELATIONS WERE DELETED FROM MODEL WITH ID={}", model.getId());
+        } catch (DataIntegrityViolationException | PersistenceException exception) {
+            log.error("ERROR WHEN DELETING RELATIONS FROM MODEL WITH ID={}! {}", model.getId(), exception.getMessage());
+            throw new RelationDeleteException("Error when deleting relations from model! [DatabaseException]", exception);
         }
     }
 
@@ -95,7 +96,7 @@ public class RelationServiceImpl implements RelationService {
     @Transactional
     public List<Relation> getRelationsByEntityIds(List<Long> modelEntityIdList) {
         var relationList = relationRepo.findByModelEntity1IdOrModelEntity2IdInModelEntityIdList(modelEntityIdList);
-        log.info("GET RELATIONS (%d)".formatted(relationList.size()));
+        log.info("GET RELATIONS ({})", relationList.size());
         return relationList;
     }
 }

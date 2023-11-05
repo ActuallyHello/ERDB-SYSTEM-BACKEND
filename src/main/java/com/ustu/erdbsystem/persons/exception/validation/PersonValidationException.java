@@ -1,6 +1,8 @@
 package com.ustu.erdbsystem.persons.exception.validation;
 
-public class PersonValidationException extends RuntimeException {
+import com.ustu.erdbsystem.persons.exception.ServerException;
+
+public class PersonValidationException extends RuntimeException implements ServerException  {
     public PersonValidationException(String message) {
         super(message);
     }

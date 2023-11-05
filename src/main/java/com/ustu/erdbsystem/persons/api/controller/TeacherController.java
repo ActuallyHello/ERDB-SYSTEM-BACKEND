@@ -10,7 +10,7 @@ import com.ustu.erdbsystem.persons.api.mapper.TeacherDTOMapper;
 import com.ustu.erdbsystem.persons.api.mapper.TeacherWithPersonDTOMapper;
 import com.ustu.erdbsystem.persons.api.mapper.TeacherWithPositionDTOMapper;
 import com.ustu.erdbsystem.persons.exception.response.PersonNotFoundException;
-import com.ustu.erdbsystem.persons.exception.response.PositionDBException;
+import com.ustu.erdbsystem.persons.exception.response.PositionServerException;
 import com.ustu.erdbsystem.persons.exception.response.PositionNotFoundException;
 import com.ustu.erdbsystem.persons.exception.response.TeacherNotFoundException;
 import com.ustu.erdbsystem.persons.exception.service.PositionCreationException;
@@ -18,6 +18,7 @@ import com.ustu.erdbsystem.persons.exception.service.PositionDeleteException;
 import com.ustu.erdbsystem.persons.service.PersonService;
 import com.ustu.erdbsystem.persons.service.PositionService;
 import com.ustu.erdbsystem.persons.service.TeacherService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -73,7 +74,7 @@ public class TeacherController {
     }
 
     @PostMapping("")
-    public ResponseEntity<Object> createTeacher(@RequestBody CreateTeacherRequestDTO createTeacherRequestDTO) {
+    public ResponseEntity<Object> createTeacher(@RequestBody @Valid CreateTeacherRequestDTO createTeacherRequestDTO) {
         var person = personService.getById(createTeacherRequestDTO.getPersonId())
                 .orElseThrow(() -> new PersonNotFoundException("Person with id=%d was not found!".formatted(createTeacherRequestDTO.getPersonId())));
         var position = positionService.getById(createTeacherRequestDTO.getPositionId())
@@ -82,7 +83,7 @@ public class TeacherController {
             var teacher = teacherService.create(person, position);
             return ResponseEntity.ok(Map.of("teacherId", teacher.getId()));
         } catch (PositionCreationException exception) {
-            throw new PositionDBException("Error when creating teacher! " + exception.getMessage(), exception);
+            throw new PositionServerException(exception.getMessage(), exception);
         }
     }
 
@@ -94,7 +95,7 @@ public class TeacherController {
             teacherService.delete(teacher);
             return ResponseEntity.noContent().build();
         } catch (PositionDeleteException exception) {
-            throw new PositionDBException("Error when deleting teacher! " + exception.getMessage(), exception);
+            throw new PositionServerException(exception.getMessage(), exception);
         }
     }
 }

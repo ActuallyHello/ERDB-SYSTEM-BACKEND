@@ -8,8 +8,10 @@ import com.ustu.erdbsystem.persons.service.UserService;
 import com.ustu.erdbsystem.persons.store.models.User;
 import com.ustu.erdbsystem.persons.store.repos.UserRepo;
 import jakarta.persistence.PersistenceException;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +25,7 @@ public class UserServiceImpl implements UserService {
     private UserRepo userRepo;
 
     @Override
+    @Transactional
     public List<User> getAll() {
         List<User> userList = userRepo.findAll();
         log.info("GET USERS ({})", userList.size());
@@ -30,6 +33,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public Optional<User> getById(Long id) {
         Optional<User> user = userRepo.findById(id);
         log.info("GET USER WITH ID={}", id);
@@ -37,39 +41,42 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public User create(UserDTO userDTO) {
         var user = UserDTOMapper.fromDTO(userDTO);
         try {
             user = userRepo.saveAndFlush(user);
             log.info("USER WITH ID={} WAS CREATED", user.getId());
             return user;
-        } catch (PersistenceException exception) {
-            log.error("CANNOT CREATE USER: {}", exception.getMessage());
-            throw new UserCreationException(exception.getMessage(), exception);
+        } catch (DataIntegrityViolationException | PersistenceException exception) {
+            log.error("ERROR WHEN CREATING USER: {}", exception.getMessage());
+            throw new UserCreationException("Error when creating user! [DatabaseException]", exception);
         }
     }
 
     @Override
+    @Transactional
     public void delete(User user) {
         try {
             userRepo.delete(user);
             userRepo.flush();
             log.info("USER WITH ID={} WAS DELETED", user.getId());
-        } catch (PersistenceException exception) {
-            log.error("CANNOT DELETE USER: {}", exception.getMessage());
-            throw new UserDeleteException(exception.getMessage(), exception);
+        } catch (DataIntegrityViolationException exception) {
+            log.error("ERROR WHEN DELETING USER: {}", exception.getMessage());
+            throw new UserDeleteException("Error when deleting user! [DatabaseException]", exception);
         }
     }
 
     @Override
+    @Transactional
     public User update(User userNew) {
         try {
             User user = userRepo.saveAndFlush(userNew);
             log.info("USER WITH ID={} WAS UPDATED", userNew.getId());
             return user;
-        } catch (PersistenceException exception) {
-            log.error("CANNOT UPDATE USER: {}", exception.getMessage());
-            throw new UserCreationException(exception.getMessage(), exception);
+        } catch (DataIntegrityViolationException exception) {
+            log.error("ERROR WHEN UPDATING USER: {}", exception.getMessage());
+            throw new UserCreationException("Error when updating user! [DatabaseException]", exception);
         }
     }
 }

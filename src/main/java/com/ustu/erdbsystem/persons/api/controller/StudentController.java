@@ -11,13 +11,14 @@ import com.ustu.erdbsystem.persons.api.mapper.StudentWithGroupDTOMapper;
 import com.ustu.erdbsystem.persons.api.mapper.StudentWithPersonDTOMapper;
 import com.ustu.erdbsystem.persons.exception.response.GroupNotFoundException;
 import com.ustu.erdbsystem.persons.exception.response.PersonNotFoundException;
-import com.ustu.erdbsystem.persons.exception.response.StudentDBException;
+import com.ustu.erdbsystem.persons.exception.response.StudentServerException;
 import com.ustu.erdbsystem.persons.exception.response.StudentNotFoundException;
 import com.ustu.erdbsystem.persons.exception.service.StudentCreationException;
 import com.ustu.erdbsystem.persons.exception.service.StudentDeleteException;
 import com.ustu.erdbsystem.persons.service.GroupService;
 import com.ustu.erdbsystem.persons.service.PersonService;
 import com.ustu.erdbsystem.persons.service.StudentService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -73,7 +74,7 @@ public class StudentController {
     }
 
     @PostMapping("")
-    public ResponseEntity<Object> createStudent(@RequestBody CreateStudentRequestDTO createStudentRequestDTO) {
+    public ResponseEntity<Object> createStudent(@RequestBody @Valid CreateStudentRequestDTO createStudentRequestDTO) {
         var group = groupService.getById(createStudentRequestDTO.getGroupId())
                 .orElseThrow(() -> new GroupNotFoundException("Group with id=%d was not found!".formatted(createStudentRequestDTO.getGroupId())));
         var person = personService.getById(createStudentRequestDTO.getPersonId())
@@ -82,7 +83,7 @@ public class StudentController {
             var student = studentService.create(person, group);
             return ResponseEntity.ok(Map.of("studentId", student.getId()));
         } catch (StudentCreationException exception) {
-            throw new StudentDBException("Error when creating student! " + exception.getMessage(), exception);
+            throw new StudentServerException(exception.getMessage(), exception);
         }
     }
 
@@ -94,7 +95,7 @@ public class StudentController {
             studentService.delete(student);
             return ResponseEntity.noContent().build();
         } catch (StudentDeleteException exception) {
-            throw new StudentDBException("Error when deleting student! " + exception.getMessage(), exception);
+            throw new StudentServerException(exception.getMessage(), exception);
         }
     }
 }

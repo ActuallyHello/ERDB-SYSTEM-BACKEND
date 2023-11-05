@@ -11,6 +11,7 @@ import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,6 +33,7 @@ public class TeacherServiceImpl implements TeacherService {
     }
 
     @Override
+    @Transactional
     public List<Teacher> getAllByPositionId(Long positionId) {
         var teacherList = teacherRepo.findAllByPositionIdWithPerson(positionId);
         log.info("GET TEACHER BY POSITION WITH ID={} ({})", positionId, teacherList.size());
@@ -47,6 +49,7 @@ public class TeacherServiceImpl implements TeacherService {
     }
 
     @Override
+    @Transactional
     public Optional<Teacher> getByIdWithPersonAndPosition(Long id) {
         var teacher = teacherRepo.findByIdWithPersonAndPosition(id);
         log.info("GET TEACHER WITH ID={}", id);
@@ -54,6 +57,7 @@ public class TeacherServiceImpl implements TeacherService {
     }
 
     @Override
+    @Transactional
     public Optional<Teacher> getByPersonIdWithPosition(Long personId) {
         var teacher = teacherRepo.findByPersonIdWithPosition(personId);
         log.info("GET TEACHER BY PERSON WITH ID={}", personId);
@@ -61,6 +65,7 @@ public class TeacherServiceImpl implements TeacherService {
     }
 
     @Override
+    @Transactional
     public Optional<Teacher> getByPerson(Person person) {
         var teacher = teacherRepo.findByPerson(person);
         log.info("GET TEACHER BY PERSON WITH ID={}", person.getId());
@@ -78,9 +83,9 @@ public class TeacherServiceImpl implements TeacherService {
             teacher = teacherRepo.saveAndFlush(teacher);
             log.info("CREATE TEACHER WITH ID={}", teacher.getId());
             return teacher;
-        } catch (PersistenceException exception) {
-            log.error("CANNOT CREATE TEACHER: {}", exception.getMessage());
-            throw new TeacherCreationException(exception.getMessage(), exception);
+        } catch (DataIntegrityViolationException | PersistenceException exception) {
+            log.error("ERROR WHEN CREATING TEACHER: {}", exception.getMessage());
+            throw new TeacherCreationException("Error when creating teacher! [DatabaseException]", exception);
         }
     }
 
@@ -91,9 +96,9 @@ public class TeacherServiceImpl implements TeacherService {
             teacherRepo.delete(teacher);
             teacherRepo.flush();
             log.info("TEACHER WITH ID={} WAS DELETED", teacher.getId());
-        } catch (PersistenceException exception) {
-            log.error("CANNOT DELETE TEACHER: {}", exception.getMessage());
-            throw new TeacherDeleteException(exception.getMessage(), exception);
+        } catch (DataIntegrityViolationException | PersistenceException exception) {
+            log.error("ERROR WHEN DELETING TEACHER: {}", exception.getMessage());
+            throw new TeacherDeleteException("Error when deleting teacher! [DatabaseException]", exception);
         }
     }
 
@@ -104,9 +109,9 @@ public class TeacherServiceImpl implements TeacherService {
             var teacher = teacherRepo.saveAndFlush(teacherNew);
             log.info("TEACHER WITH ID={} WAS UPDATED", teacher.getId());
             return teacher;
-        } catch (PersistenceException exception) {
-            log.error("CANNOT UPDATE TEACHER: {}", exception.getMessage());
-            throw new TeacherDeleteException(exception.getMessage(), exception);
+        } catch (DataIntegrityViolationException exception) {
+            log.error("ERROR WHEN UPDATING TEACHER: {}", exception.getMessage());
+            throw new TeacherDeleteException("Error when updating teacher! [DatabaseException]", exception);
         }
     }
 }

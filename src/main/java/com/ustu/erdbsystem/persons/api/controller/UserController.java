@@ -4,10 +4,11 @@ import com.ustu.erdbsystem.persons.api.dto.response.UserRestrictDTO;
 import com.ustu.erdbsystem.persons.api.dto.request.CreateUserRequestDTO;
 import com.ustu.erdbsystem.persons.api.mapper.UserDTOMapper;
 import com.ustu.erdbsystem.persons.api.mapper.UserRestrictDTOMapper;
-import com.ustu.erdbsystem.persons.exception.response.UserDBException;
+import com.ustu.erdbsystem.persons.exception.response.UserServerException;
 import com.ustu.erdbsystem.persons.exception.response.UserNotFoundException;
 import com.ustu.erdbsystem.persons.exception.service.UserCreationException;
 import com.ustu.erdbsystem.persons.service.UserService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -46,13 +47,13 @@ public class UserController {
     }
 
     @PostMapping("")
-    public ResponseEntity<Object> createUser(@RequestBody CreateUserRequestDTO createUserRequestDTO) {
+    public ResponseEntity<Object> createUser(@RequestBody @Valid CreateUserRequestDTO createUserRequestDTO) {
         var userDTO = UserDTOMapper.makeDTO(createUserRequestDTO);
         try {
             var user = userService.create(userDTO);
             return ResponseEntity.ok(Map.of("userId", user.getId()));
         } catch (UserCreationException exception) {
-            throw new UserDBException("Error when creating user! " + exception.getMessage(), exception);
+            throw new UserServerException(exception.getMessage(), exception);
         }
     }
 }

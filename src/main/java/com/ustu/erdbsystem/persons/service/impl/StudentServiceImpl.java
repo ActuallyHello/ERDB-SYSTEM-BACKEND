@@ -11,6 +11,7 @@ import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class StudentServiceImpl implements StudentService {
     private StudentRepo studentRepo;
 
     @Override
+    @Transactional
     public List<Student> getAllByGroupIdWithPerson(Long groupId) {
         var studentList = studentRepo.findAllByGroupIdWithPerson(groupId);
         log.info("GET STUDENTS BY GROUP WITH ID={} ({})", groupId, studentList.size());
@@ -64,33 +66,35 @@ public class StudentServiceImpl implements StudentService {
             student = studentRepo.saveAndFlush(student);
             log.info("STUDENT WITH ID={} WAS CREATED", student.getId());
             return student;
-        } catch (PersistenceException exception) {
-            log.error("CANNOT CREATE STUDENT: {}", exception.getMessage());
-            throw new StudentCreationException(exception.getMessage(), exception);
+        } catch (DataIntegrityViolationException | PersistenceException exception) {
+            log.error("ERROR WHEN CREATING STUDENT: {}", exception.getMessage());
+            throw new StudentCreationException("Error when creating student! [DatabaseException]", exception);
         }
     }
 
     @Override
+    @Transactional
     public void delete(Student student) {
         try {
             studentRepo.delete(student);
             studentRepo.flush();
             log.info("STUDENT WITH ID={} WAS DELETED", student.getId());
-        } catch (PersistenceException exception) {
-            log.error("CANNOT DELETE STUDENT: {}", exception.getMessage());
-            throw new StudentDeleteException(exception.getMessage(), exception);
+        } catch (DataIntegrityViolationException exception) {
+            log.error("ERROR WHEN DELETING STUDENT: {}", exception.getMessage());
+            throw new StudentDeleteException("Error when deleting student! [DatabaseException]", exception);
         }
     }
 
     @Override
+    @Transactional
     public Student update(Student studentNew) {
         try {
             var student = studentRepo.saveAndFlush(studentNew);
             log.info("STUDENT WITH ID={} WAS UPDATED", studentNew.getId());
             return student;
-        } catch (PersistenceException exception) {
-            log.error("CANNOT UPDATE STUDENT: {}", exception.getMessage());
-            throw new StudentCreationException(exception.getMessage(), exception);
+        } catch (DataIntegrityViolationException exception) {
+            log.error("ERROR WHEN UPDATING STUDENT: {}", exception.getMessage());
+            throw new StudentCreationException("Error when updating student! [DatabaseException]", exception);
         }
     }
 }

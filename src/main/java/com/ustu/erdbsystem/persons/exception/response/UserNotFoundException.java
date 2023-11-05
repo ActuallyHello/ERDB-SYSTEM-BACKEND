@@ -1,6 +1,8 @@
 package com.ustu.erdbsystem.persons.exception.response;
 
-public class UserNotFoundException extends RuntimeException {
+import com.ustu.erdbsystem.persons.exception.NotFoundException;
+
+public class UserNotFoundException extends RuntimeException implements NotFoundException {
     public UserNotFoundException(String message) {
         super(message);
     }

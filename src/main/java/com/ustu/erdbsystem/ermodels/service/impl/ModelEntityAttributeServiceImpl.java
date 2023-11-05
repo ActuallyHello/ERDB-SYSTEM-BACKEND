@@ -12,6 +12,7 @@ import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,14 +42,11 @@ public class ModelEntityAttributeServiceImpl implements ModelEntityAttributeServ
         }
         try {
             modelEntityRepo.saveAllAndFlush(model.getModelEntityList());
-            log.info("CREATED ENTITIES (%d) IN MODEL WITH ID=%d".formatted(
-                    model.getModelEntityList().size(),
-                    model.getId()
-            ));
+            log.info("CREATED ENTITIES ({}) IN MODEL WITH ID={}", model.getModelEntityList().size(), model.getId());
             return model.getModelEntityList();
-        } catch (PersistenceException exception) {
-            log.error("CANNOT CREATE ENTITIES WITH ATTRIBUTES: %s".formatted(exception.getMessage()));
-            throw new ModelEntityCreationException(exception.getMessage(), exception);
+        } catch (DataIntegrityViolationException | PersistenceException exception) {
+            log.error("ERROR WHEN CREATING ENTITIES WITH ATTRIBUTES: {}", exception.getMessage());
+            throw new ModelEntityCreationException("Error when creating entities with attributes! [DatabaseException]", exception);
         }
     }
 
@@ -56,7 +54,7 @@ public class ModelEntityAttributeServiceImpl implements ModelEntityAttributeServ
     @Transactional
     public List<ModelEntity> getAllByModel(Model model) {
         var modelEntityList = modelEntityRepo.getAllByModel(model);
-        log.info("GET ENTITIES (%d)".formatted(modelEntityList.size()));
+        log.info("GET ENTITIES ({})", modelEntityList.size());
         return modelEntityList;
     }
 }

@@ -12,6 +12,8 @@ import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,6 +27,7 @@ public class PersonServiceImpl implements PersonService {
     private PersonRepo personRepo;
 
     @Override
+    @Transactional
     public List<Person> getAll() {
         var personList = personRepo.findAll();
         log.info("GET PERSONS ({})", personList.size());
@@ -51,12 +54,14 @@ public class PersonServiceImpl implements PersonService {
     @Transactional
     public Person create(PersonDTO personDTO, User user) {
         var person = PersonDTOMapper.fromDTO(personDTO);
+        person.setUser(user);
         try {
             person = personRepo.saveAndFlush(person);
             log.info("CREATED PERSON WITH ID={}", person.getId());
             return person;
-        } catch (PersistenceException exception) {
-            throw new PersonCreationException(exception.getMessage(), exception);
+        } catch (DataIntegrityViolationException | PersistenceException exception) {
+            log.error("ERROR WHEN CREATING PERSON: {}", exception.getMessage());
+            throw new PersonCreationException("Error when creating person! [DatabaseException]", exception);
         }
     }
 
@@ -67,9 +72,9 @@ public class PersonServiceImpl implements PersonService {
             personRepo.delete(person);
             personRepo.flush();
             log.info("PERSON WITH ID={} WAS DELETED", person.getId());
-        } catch (PersistenceException exception) {
-            log.error("CANNOT DELETE PERSON WITH ID={}! {}", person.getId(), exception.getMessage());
-            throw new PersonDeleteException(exception.getMessage(), exception);
+        } catch (DataIntegrityViolationException | PersistenceException exception) {
+            log.error("ERROR WHEN DELETING PERSON! {}", exception.getMessage());
+            throw new PersonDeleteException("Error when deleting person! [DatabaseException]", exception);
         }
     }
 
@@ -80,9 +85,9 @@ public class PersonServiceImpl implements PersonService {
             var person = personRepo.saveAndFlush(personNew);
             log.info("PERSON WITH ID={} WAS UPDATED", person.getId());
             return person;
-        } catch (PersistenceException exception) {
-            log.error("CANNOT UPDATE PERSON! {}", exception.getMessage());
-            throw new PersonCreationException(exception.getMessage(), exception);
+        } catch (DataIntegrityViolationException exception) {
+            log.error("ERROR WHEN UPDATING PERSON! {}", exception.getMessage());
+            throw new PersonCreationException("Error when updating person! [DatabaseException]", exception);
         }
     }
 }

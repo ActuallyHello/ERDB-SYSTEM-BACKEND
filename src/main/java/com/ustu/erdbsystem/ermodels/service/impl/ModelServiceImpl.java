@@ -21,6 +21,7 @@ import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -70,10 +71,10 @@ public class ModelServiceImpl implements ModelService {
         try {
             modelRepo.delete(model);
             modelRepo.flush();
-            log.info("MODEL WITH ID=%d WAS DELETED!".formatted(model.getId()));
-        } catch (PersistenceException exception) {
-            log.error("CANNOT DELETE MODEL WITH ID=%d! %s".formatted(model.getId(), exception));
-            throw new ModelDeleteException(exception.getMessage(), exception);
+            log.info("MODEL WITH ID={} WAS DELETED!", model.getId());
+        } catch (DataIntegrityViolationException | PersistenceException exception) {
+            log.error("ERROR WHEN DELETING MODEL WITH ID={}! {}", model.getId(), exception.getMessage());
+            throw new ModelDeleteException("Error when deleting model! [DatabaseException]", exception);
         }
     }
 
@@ -87,10 +88,10 @@ public class ModelServiceImpl implements ModelService {
         person.addModel(model);
         try {
             model = modelRepo.saveAndFlush(model);
-            log.info("MODEL WITH ID=%d WAS CREATED");
-        } catch (PersistenceException exception) {
-            log.error("ERROR WHEN CREATING A MODELS: %s".formatted(exception.getMessage()));
-            throw new ModelCreationException(exception.getMessage(), exception);
+            log.info("MODEL WITH ID={} WAS CREATED", model.getId());
+        } catch (DataIntegrityViolationException | PersistenceException exception) {
+            log.error("ERROR WHEN CREATING MODEL! {}", exception.getMessage());
+            throw new ModelCreationException("Error when creating model! [DatabaseException]", exception);
         }
         List<ModelEntity> modelEntityList;
         try {

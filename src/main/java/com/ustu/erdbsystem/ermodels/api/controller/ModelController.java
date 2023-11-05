@@ -92,15 +92,15 @@ public class ModelController {
             relationDTOList = createModelRequestDTO.getRelationList().stream()
                     .map(RelationDTOMapper::makeDTO)
                     .toList();
-        } catch (EnumValueException exception) { // TODO JSON VALIDATION
-            throw new ModelValidationException("Validation error! " + exception.getMessage(), exception);
+        } catch (EnumValueException exception) {
+            throw new ModelValidationException(exception.getMessage(), exception);
         }
 
         try {
             var model = modelService.create(person, modelDTO, modelEntityDTOList, relationDTOList);
             return ResponseEntity.ok(Map.of("modelId", model.getId()));
         } catch (ModelCreationException exception) {
-            throw new ModelServerException("Error when creating model! " + exception.getMessage(), exception);
+            throw new ModelServerException(exception.getMessage(), exception);
         }
     }
 
@@ -112,7 +112,7 @@ public class ModelController {
             modelService.deleteModel(model);
             return ResponseEntity.noContent().build();
         } catch (ModelDeleteException exception) {
-            throw new ModelServerException("Error when deleting model! " + exception.getMessage(), exception);
+            throw new ModelServerException(exception.getMessage(), exception);
         }
     }
 }
