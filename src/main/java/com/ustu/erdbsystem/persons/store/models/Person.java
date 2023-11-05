@@ -46,7 +46,8 @@ public class Person {
 
     @OneToOne(
             fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL
+            cascade = CascadeType.ALL,
+            optional = false
     )
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
