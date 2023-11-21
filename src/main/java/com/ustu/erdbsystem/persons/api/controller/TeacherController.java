@@ -73,7 +73,7 @@ public class TeacherController {
         return ResponseEntity.ok(teacherDTOList);
     }
 
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<Object> createTeacher(@RequestBody @Valid CreateTeacherRequestDTO createTeacherRequestDTO) {
         var person = personService.getById(createTeacherRequestDTO.getPersonId())
                 .orElseThrow(() -> new PersonNotFoundException("Person with id=%d was not found!".formatted(createTeacherRequestDTO.getPersonId())));

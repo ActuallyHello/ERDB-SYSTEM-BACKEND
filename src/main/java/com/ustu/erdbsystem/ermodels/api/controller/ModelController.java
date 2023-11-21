@@ -21,6 +21,7 @@ import com.ustu.erdbsystem.ermodels.exception.validation.EnumValueException;
 import com.ustu.erdbsystem.ermodels.service.ModelEntityAttributeService;
 import com.ustu.erdbsystem.ermodels.service.ModelService;
 import com.ustu.erdbsystem.ermodels.service.RelationService;
+import com.ustu.erdbsystem.ermodels.store.models.Model;
 import com.ustu.erdbsystem.persons.api.mapper.PersonDTOMapper;
 import com.ustu.erdbsystem.persons.service.PersonService;
 import jakarta.validation.Valid;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -47,9 +49,33 @@ public class ModelController {
     private RelationService relationService;
     private ModelEntityAttributeService modelEntityAttributeService;
 
-    @GetMapping("")
-    public ResponseEntity<List<ModelWithPersonDTO>> getModelsWithPerson() {
-        var modelWithPersonDTOList = modelService.getAllWithPerson().stream()
+
+    @GetMapping
+    public ResponseEntity<List<ModelWithPersonDTO>> getModelsWithPerson(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
+        List<Model> modelWithPersonList;
+        if (page == null && size == null) {
+            modelWithPersonList = modelService.getAllWithPerson();
+        } else {
+            page = page == null ? 0 : page;
+            size = size == null ? 20 : size;
+            modelWithPersonList = modelService.getAllWithPerson(page, size);
+        }
+        var modelWithPersonDTOList = modelWithPersonList.stream()
+                .map(model -> ModelWithPersonDTOMapper.makeDTO(
+                        model,
+                        PersonDTOMapper.makeDTO(model.getPerson())
+                ))
+                .toList();
+        return ResponseEntity.ok(modelWithPersonDTOList);
+    }
+
+    @GetMapping("/persons/{id}")
+    public ResponseEntity<List<ModelWithPersonDTO>> getModelsWithPersonByPersonId(@PathVariable Long id) {
+        var person = personService.getByIdWithModels(id)
+                .orElseThrow(() -> new ModelOwnerNotFoundException("Person with id=%d was not found".formatted(id)));
+        var modelWithPersonDTOList = person.getModelList().stream()
                 .map(model -> ModelWithPersonDTOMapper.makeDTO(
                         model,
                         PersonDTOMapper.makeDTO(model.getPerson())
@@ -79,7 +105,7 @@ public class ModelController {
 
     @PostMapping
     public ResponseEntity<Object> createModel(@RequestBody @Valid CreateModelRequestDTO createModelRequestDTO) {
-        var person = personService.getById(createModelRequestDTO.getPersonId())
+        var person = personService.getByIdWithModels(createModelRequestDTO.getPersonId())
                 .orElseThrow(() -> new ModelOwnerNotFoundException("Person with id=%d was not found".formatted(createModelRequestDTO.getPersonId())));
         ModelDTO modelDTO;
         List<ModelEntityDTO> modelEntityDTOList;

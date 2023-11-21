@@ -39,7 +39,7 @@ public class Result {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
+    @Column
     private Mark mark;
     @Column(updatable = false)
     @CreatedDate
@@ -54,8 +54,7 @@ public class Result {
     private Model model;
 
     @ManyToOne(
-            fetch = FetchType.EAGER,
-            optional = false
+            fetch = FetchType.EAGER
     )
     private Teacher teacher;
 
