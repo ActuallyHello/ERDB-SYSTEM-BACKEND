@@ -6,6 +6,7 @@ spring:
     driverClassName: org.postgresql.Driver
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl_auto: create-drop
     show-sql: true
