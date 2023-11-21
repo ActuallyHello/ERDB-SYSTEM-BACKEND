@@ -19,9 +19,10 @@ public class ModelDTO {
     private String title;
     private String description;
     private String topic;
-    @JsonFormat(pattern="yyyy-MM-dd", timezone = "UTC")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "UTC")
     private Instant createdAt;
-    @JsonFormat(pattern="yyyy-MM-dd", timezone = "UTC")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "UTC")
     private Instant updatedAt;
+    @Builder.Default
     private Boolean isTaskResult = false;
 }
