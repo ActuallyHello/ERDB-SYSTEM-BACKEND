@@ -8,7 +8,7 @@ import com.ustu.erdbsystem.persons.store.models.Position;
 import com.ustu.erdbsystem.persons.store.models.Teacher;
 import com.ustu.erdbsystem.persons.store.repos.TeacherRepo;
 import jakarta.persistence.PersistenceException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,12 +20,12 @@ import java.util.Optional;
 @AllArgsConstructor
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 public class TeacherServiceImpl implements TeacherService {
 
     private TeacherRepo teacherRepo;
 
     @Override
-    @Transactional
     public List<Teacher> getAll() {
         var teacherList = teacherRepo.findAll();
         log.info("GET TEACHER ({})", teacherList.size());
@@ -33,7 +33,6 @@ public class TeacherServiceImpl implements TeacherService {
     }
 
     @Override
-    @Transactional
     public List<Teacher> getAllByPositionId(Long positionId) {
         var teacherList = teacherRepo.findAllByPositionIdWithPerson(positionId);
         log.info("GET TEACHER BY POSITION WITH ID={} ({})", positionId, teacherList.size());
@@ -41,7 +40,6 @@ public class TeacherServiceImpl implements TeacherService {
     }
 
     @Override
-    @Transactional
     public Optional<Teacher> getById(Long id) {
         var teacher = teacherRepo.findById(id);
         log.info("GET TEACHER WITH ID={}", id);
@@ -49,7 +47,6 @@ public class TeacherServiceImpl implements TeacherService {
     }
 
     @Override
-    @Transactional
     public Optional<Teacher> getByIdWithPersonAndPosition(Long id) {
         var teacher = teacherRepo.findByIdWithPersonAndPosition(id);
         log.info("GET TEACHER WITH ID={}", id);
@@ -57,7 +54,6 @@ public class TeacherServiceImpl implements TeacherService {
     }
 
     @Override
-    @Transactional
     public Optional<Teacher> getByPersonIdWithPosition(Long personId) {
         var teacher = teacherRepo.findByPersonIdWithPosition(personId);
         log.info("GET TEACHER BY PERSON WITH ID={}", personId);
@@ -65,7 +61,6 @@ public class TeacherServiceImpl implements TeacherService {
     }
 
     @Override
-    @Transactional
     public Optional<Teacher> getByPerson(Person person) {
         var teacher = teacherRepo.findByPerson(person);
         log.info("GET TEACHER BY PERSON WITH ID={}", person.getId());

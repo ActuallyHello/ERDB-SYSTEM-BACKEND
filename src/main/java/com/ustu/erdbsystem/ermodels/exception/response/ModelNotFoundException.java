@@ -1,6 +1,6 @@
 package com.ustu.erdbsystem.ermodels.exception.response;
 
-import com.ustu.erdbsystem.ermodels.exception.NotFoundException;
+import com.ustu.erdbsystem.exceptions.NotFoundException;
 
 public class ModelNotFoundException extends RuntimeException implements NotFoundException {
     public ModelNotFoundException(String message) {

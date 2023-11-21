@@ -1,6 +1,6 @@
 package com.ustu.erdbsystem.ermodels.exception.response;
 
-import com.ustu.erdbsystem.ermodels.exception.ServerException;
+import com.ustu.erdbsystem.exceptions.ServerException;
 
 public class ModelServerException extends RuntimeException implements ServerException {
 

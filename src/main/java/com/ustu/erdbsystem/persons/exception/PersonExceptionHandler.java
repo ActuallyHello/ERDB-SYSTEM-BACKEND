@@ -1,5 +1,8 @@
 package com.ustu.erdbsystem.persons.exception;
 
+import com.ustu.erdbsystem.exceptions.ExceptionDTO;
+import com.ustu.erdbsystem.exceptions.NotFoundException;
+import com.ustu.erdbsystem.exceptions.ServerException;
 import com.ustu.erdbsystem.persons.exception.response.GroupServerException;
 import com.ustu.erdbsystem.persons.exception.response.GroupNotFoundException;
 import com.ustu.erdbsystem.persons.exception.response.PersonServerException;
@@ -20,13 +23,11 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "com.ustu.erdbsystem.persons.api.controller")
 public class PersonExceptionHandler {
 
     @ExceptionHandler(
@@ -41,7 +42,7 @@ public class PersonExceptionHandler {
     )
     public ResponseEntity<Object> handleNotFoundException(
             NotFoundException notFoundException) {
-        var personException = new PersonException(
+        var personException = new ExceptionDTO(
                 notFoundException.getMessage(),
                 notFoundException.getClass().getSimpleName(),
                 HttpStatus.NOT_FOUND,
@@ -63,7 +64,7 @@ public class PersonExceptionHandler {
     )
     public ResponseEntity<Object> handleServerException(
             ServerException serverException) {
-        var personException = new PersonException(
+        var personException = new ExceptionDTO(
                 serverException.getMessage(),
                 serverException.getClass().getSimpleName(),
                 HttpStatus.BAD_REQUEST,
@@ -86,7 +87,7 @@ public class PersonExceptionHandler {
                                 Collectors.mapping(FieldError::getDefaultMessage, Collectors.toList())
                         )
                 );
-        var personException = new PersonException(
+        var personException = new ExceptionDTO(
                 errorMap,
                 methodArgumentNotValidException.getClass().getSimpleName(),
                 HttpStatus.BAD_REQUEST,
