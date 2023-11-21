@@ -8,7 +8,7 @@ import com.ustu.erdbsystem.persons.service.GroupService;
 import com.ustu.erdbsystem.persons.store.models.Group;
 import com.ustu.erdbsystem.persons.store.repos.GroupRepo;
 import jakarta.persistence.PersistenceException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,12 +20,12 @@ import java.util.Optional;
 @AllArgsConstructor
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 public class GroupServiceImpl implements GroupService {
 
     private GroupRepo groupRepo;
 
     @Override
-    @Transactional
     public List<Group> getAll() {
         var groupList = groupRepo.findAll();
         log.info("GET GROUPS ({})", groupList.size());
@@ -33,7 +33,6 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    @Transactional
     public List<Group> getAll(Boolean isActive) {
         var groupList = groupRepo.findByIsActive(isActive);
         log.info("GET GROUPS BY ACTIVE={} ({})", isActive, groupList.size());
@@ -41,7 +40,6 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    @Transactional
     public Optional<Group> getById(Long id) {
         var group = groupRepo.findById(id);
         log.info("GET GROUP WITH ID={}", id);

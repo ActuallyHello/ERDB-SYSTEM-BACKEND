@@ -8,7 +8,7 @@ import com.ustu.erdbsystem.persons.service.UserService;
 import com.ustu.erdbsystem.persons.store.models.User;
 import com.ustu.erdbsystem.persons.store.repos.UserRepo;
 import jakarta.persistence.PersistenceException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,12 +20,12 @@ import java.util.Optional;
 @AllArgsConstructor
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
     private UserRepo userRepo;
 
     @Override
-    @Transactional
     public List<User> getAll() {
         List<User> userList = userRepo.findAll();
         log.info("GET USERS ({})", userList.size());
@@ -33,7 +33,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public Optional<User> getById(Long id) {
         Optional<User> user = userRepo.findById(id);
         log.info("GET USER WITH ID={}", id);

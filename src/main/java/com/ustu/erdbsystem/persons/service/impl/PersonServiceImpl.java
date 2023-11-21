@@ -9,7 +9,7 @@ import com.ustu.erdbsystem.persons.store.models.Person;
 import com.ustu.erdbsystem.persons.store.models.User;
 import com.ustu.erdbsystem.persons.store.repos.PersonRepo;
 import jakarta.persistence.PersistenceException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,12 +22,12 @@ import java.util.Optional;
 @AllArgsConstructor
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 public class PersonServiceImpl implements PersonService {
 
     private PersonRepo personRepo;
 
     @Override
-    @Transactional
     public List<Person> getAll() {
         var personList = personRepo.findAll();
         log.info("GET PERSONS ({})", personList.size());
@@ -35,7 +35,6 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    @Transactional
     public Optional<Person> getById(Long id) {
         var person = personRepo.findById(id);
         log.info("GET PERSON BY ID={}", id);
@@ -43,7 +42,14 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    @Transactional
+    public Optional<Person> getByIdWithModels(Long id) {
+        System.out.println();
+        var person = personRepo.findByIdWithModels(id);
+        log.info("GET PERSON BY ID={}", id);
+        return person;
+    }
+
+    @Override
     public Optional<Person> getByUser(User user) {
         var person = personRepo.findByUser(user);
         log.info("GET PERSON BY USER WITH ID={}", user.getId());

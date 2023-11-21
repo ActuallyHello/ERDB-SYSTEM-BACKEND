@@ -11,7 +11,7 @@ import com.ustu.erdbsystem.ermodels.store.models.Relation;
 import com.ustu.erdbsystem.ermodels.store.models.enums.Power;
 import com.ustu.erdbsystem.ermodels.store.repos.RelationRepo;
 import jakarta.persistence.PersistenceException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -23,6 +23,7 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 public class RelationServiceImpl implements RelationService {
 
     private RelationRepo relationRepo;
@@ -93,7 +94,6 @@ public class RelationServiceImpl implements RelationService {
     }
 
     @Override
-    @Transactional
     public List<Relation> getRelationsByEntityIds(List<Long> modelEntityIdList) {
         var relationList = relationRepo.findByModelEntity1IdOrModelEntity2IdInModelEntityIdList(modelEntityIdList);
         log.info("GET RELATIONS ({})", relationList.size());

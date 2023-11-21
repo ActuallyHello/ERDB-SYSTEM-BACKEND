@@ -8,7 +8,7 @@ import com.ustu.erdbsystem.persons.store.models.Person;
 import com.ustu.erdbsystem.persons.store.models.Student;
 import com.ustu.erdbsystem.persons.store.repos.StudentRepo;
 import jakarta.persistence.PersistenceException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,12 +20,12 @@ import java.util.Optional;
 @AllArgsConstructor
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 public class StudentServiceImpl implements StudentService {
 
     private StudentRepo studentRepo;
 
     @Override
-    @Transactional
     public List<Student> getAllByGroupIdWithPerson(Long groupId) {
         var studentList = studentRepo.findAllByGroupIdWithPerson(groupId);
         log.info("GET STUDENTS BY GROUP WITH ID={} ({})", groupId, studentList.size());
@@ -33,7 +33,6 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    @Transactional
     public Optional<Student> getById(Long id) {
         var student = studentRepo.findById(id);
         log.info("GET STUDENT WITH ID={}", id);
@@ -48,7 +47,6 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    @Transactional
     public Optional<Student> getByPersonIdWithGroup(Long personId) {
         var student = studentRepo.findByPersonIdWithGroup(personId);
         log.info("GET STUDENT BY PERSON WITH ID={}", personId);

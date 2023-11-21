@@ -18,10 +18,12 @@ import com.ustu.erdbsystem.ermodels.store.models.ModelEntity;
 import com.ustu.erdbsystem.ermodels.store.repos.ModelRepo;
 import com.ustu.erdbsystem.persons.store.models.Person;
 import jakarta.persistence.PersistenceException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,6 +32,7 @@ import java.util.Optional;
 @AllArgsConstructor
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 public class ModelServiceImpl implements ModelService {
 
     private ModelEntityAttributeService modelEntityAttributeService;
@@ -37,27 +40,39 @@ public class ModelServiceImpl implements ModelService {
     private ModelRepo modelRepo;
 
     @Override
-    @Transactional
     public List<Model> getAllWithPerson() {
-        var modelList = modelRepo.findAllWithPerson();
-        log.info("GET MODELS (%d)".formatted(modelList.size()));
+        var modelList = modelRepo.findAll();
+        log.info("GET MODELS ({})", modelList.size());
         return modelList;
     }
 
     @Override
-    @Transactional
     public List<Model> getAllWithPerson(List<Long> idList) {
-        var modelList = modelRepo.findAllByIdInRangeWithPerson(idList);
-        log.info("GET MODELS (%d)".formatted(modelList.size()));
+        var modelList = modelRepo.findAllById(idList);
+        log.info("GET MODELS ({})", modelList.size());
         return modelList;
     }
 
     @Override
-    @Transactional
+    public List<Model> getAllWithPerson(int page, int size) {
+        var pageable = PageRequest.of(page, size, Sort.by("id", "title"));
+        var modelList = modelRepo.findAllBy(pageable);
+        log.info("GET MODELS ({}) PAGE={} SIZE={}", modelList.size(), page, size);
+        return modelList;
+    }
+
+    @Override
     public Optional<Model> getById(Long id) {
         var model = modelRepo.findById(id);
-        log.info("GET MODEL WITH ID=%d".formatted(id));
+        log.info("GET MODEL WITH ID={}", id);
         return model;
+    }
+
+    @Override
+    public List<Model> getAllByPerson(Person person) {
+        var modelList = modelRepo.findAllByPerson(person);
+        log.info("GET MODELS ({}) BY PERSON WITH ID={}", modelList.size(), person.getId());
+        return modelList;
     }
 
     @Override

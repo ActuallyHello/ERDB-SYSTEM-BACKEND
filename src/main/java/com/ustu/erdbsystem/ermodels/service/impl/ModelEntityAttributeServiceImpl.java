@@ -9,7 +9,7 @@ import com.ustu.erdbsystem.ermodels.store.models.ModelEntity;
 import com.ustu.erdbsystem.ermodels.store.models.enums.AttributeType;
 import com.ustu.erdbsystem.ermodels.store.repos.ModelEntityRepo;
 import jakarta.persistence.PersistenceException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,6 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 public class ModelEntityAttributeServiceImpl implements ModelEntityAttributeService {
 
     private ModelEntityRepo modelEntityRepo;
@@ -51,7 +52,6 @@ public class ModelEntityAttributeServiceImpl implements ModelEntityAttributeServ
     }
 
     @Override
-    @Transactional
     public List<ModelEntity> getAllByModel(Model model) {
         var modelEntityList = modelEntityRepo.getAllByModel(model);
         log.info("GET ENTITIES ({})", modelEntityList.size());
