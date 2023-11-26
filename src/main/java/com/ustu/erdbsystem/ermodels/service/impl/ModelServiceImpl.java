@@ -13,8 +13,11 @@ import com.ustu.erdbsystem.ermodels.exception.validation.RelationDoesNotMatchEnt
 import com.ustu.erdbsystem.ermodels.service.ModelEntityAttributeService;
 import com.ustu.erdbsystem.ermodels.service.ModelService;
 import com.ustu.erdbsystem.ermodels.service.RelationService;
+import com.ustu.erdbsystem.ermodels.store.models.Attribute;
 import com.ustu.erdbsystem.ermodels.store.models.Model;
 import com.ustu.erdbsystem.ermodels.store.models.ModelEntity;
+import com.ustu.erdbsystem.ermodels.store.models.enums.AttributeType;
+import com.ustu.erdbsystem.ermodels.store.repos.ModelEntityRepo;
 import com.ustu.erdbsystem.ermodels.store.repos.ModelRepo;
 import com.ustu.erdbsystem.persons.store.models.Person;
 import jakarta.persistence.PersistenceException;
@@ -35,9 +38,9 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class ModelServiceImpl implements ModelService {
 
-    private ModelEntityAttributeService modelEntityAttributeService;
-    private RelationService relationService;
-    private ModelRepo modelRepo;
+    private final RelationService relationService;
+    private final ModelRepo modelRepo;
+    private final ModelEntityAttributeService modelEntityAttributeService;
 
     @Override
     public List<Model> getAllWithPerson() {
@@ -104,20 +107,13 @@ public class ModelServiceImpl implements ModelService {
         try {
             model = modelRepo.saveAndFlush(model);
             log.info("MODEL WITH ID={} WAS CREATED", model.getId());
-        } catch (DataIntegrityViolationException | PersistenceException exception) {
+            var modelEntityList = modelEntityAttributeService.createModelEntities(modelEntityDTOList, model);
+            relationService.createEntitiesRelations(relationDTOList, modelEntityList);
+        } catch (ModelEntityCreationException | RelationCreationException |
+                 RelationDoesNotMatchEntityException | DataIntegrityViolationException |
+                 PersistenceException exception) {
             log.error("ERROR WHEN CREATING MODEL! {}", exception.getMessage());
             throw new ModelCreationException("Error when creating model! [DatabaseException]", exception);
-        }
-        List<ModelEntity> modelEntityList;
-        try {
-            modelEntityList = modelEntityAttributeService.createModelEntities(modelEntityDTOList, model);
-        } catch (ModelEntityCreationException exception) {
-            throw new ModelCreationException(exception.getMessage(), exception);
-        }
-        try {
-            relationService.createEntitiesRelations(relationDTOList, modelEntityList);
-        } catch (RelationCreationException | RelationDoesNotMatchEntityException exception) {
-            throw new ModelCreationException(exception.getMessage(), exception);
         }
         return model;
     }
