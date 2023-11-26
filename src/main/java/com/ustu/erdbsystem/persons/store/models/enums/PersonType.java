@@ -21,7 +21,6 @@ public enum PersonType {
     }
 
     public String getValue() {
-        PersonType.valueOf("string");
         return personType;
     }
 }
