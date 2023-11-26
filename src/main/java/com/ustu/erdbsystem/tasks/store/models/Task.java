@@ -50,6 +50,8 @@ public class Task {
     private String description;
     @Column(nullable = false)
     private Complexity complexity;
+    @Column
+    private Integer testDataAmount;
     @Column(updatable = false)
     @CreatedDate
     private Instant createdAt;
@@ -71,7 +73,13 @@ public class Task {
             joinColumns = @JoinColumn(name = "task_id"),
             inverseJoinColumns = @JoinColumn(name = "denormalize_model_id")
     )
+    @Builder.Default
     private List<DenormalizeModel> denormalizeModelList = new ArrayList<>();
+
+    public void addDenormalizeModel(DenormalizeModel denormalizeModel) {
+        this.denormalizeModelList.add(denormalizeModel);
+        denormalizeModel.getTaskList().add(this);
+    }
 
     @Override
     public boolean equals(Object o) {
