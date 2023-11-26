@@ -46,7 +46,7 @@ public class DenormalizeModel {
     private Instant updatedAt;
 
     @OneToOne(
-            cascade = CascadeType.ALL,
+            cascade = CascadeType.MERGE,
             fetch = FetchType.LAZY
     )
     @JoinColumn(name = "model_id", referencedColumnName = "id")
@@ -55,6 +55,7 @@ public class DenormalizeModel {
     @ManyToMany(
             mappedBy = "denormalizeModelList"
     )
+    @Builder.Default
     private List<Task> taskList = new ArrayList<>();
 
     @Override
