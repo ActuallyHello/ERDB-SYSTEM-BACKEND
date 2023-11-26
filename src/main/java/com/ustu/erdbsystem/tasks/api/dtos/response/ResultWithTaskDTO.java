@@ -17,9 +17,8 @@ import lombok.NoArgsConstructor;
 public class ResultWithTaskDTO {
     private ResultDTO resultDTO;
     private TaskDTO taskDTO;
-    private TeacherDTO teacherDTO;
-    private ModelDTO modelResultDTO;
-    private StudentDTO studentDTO;
-
     private ModelDTO modelSourceDTO;
+    private ModelDTO modelResultDTO;
+    private TeacherDTO teacherDTO;
+    private StudentDTO studentDTO;
 }

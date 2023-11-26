@@ -48,6 +48,7 @@ public class Student {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @Builder.Default
     private List<TaskStudent> taskStudentList = new ArrayList<>();
 
     public void addTaskStudent(TaskStudent taskStudent) {
