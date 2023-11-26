@@ -36,4 +36,11 @@ public interface TeacherRepo extends JpaRepository<Teacher, Long> {
             WHERE pos.id = :positionId
             """)
     List<Teacher> findAllByPositionIdWithPerson(Long positionId);
+
+    @Query("""
+            SELECT t FROM Teacher t
+                LEFT JOIN FETCH t.taskList
+            WHERE t.id = :id
+            """)
+    Optional<Teacher> findByIdWithTasks(Long id);
 }

@@ -47,6 +47,13 @@ public class TeacherServiceImpl implements TeacherService {
     }
 
     @Override
+    public Optional<Teacher> getByIdWithTasks(Long id) {
+        var teacher = teacherRepo.findByIdWithTasks(id);
+        log.info("GET TEACHER WITH ID={}", id);
+        return teacher;
+    }
+
+    @Override
     public Optional<Teacher> getByIdWithPersonAndPosition(Long id) {
         var teacher = teacherRepo.findByIdWithPersonAndPosition(id);
         log.info("GET TEACHER WITH ID={}", id);

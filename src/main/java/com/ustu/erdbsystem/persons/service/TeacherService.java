@@ -14,6 +14,8 @@ public interface TeacherService {
 
     Optional<Teacher> getById(Long id);
 
+    Optional<Teacher> getByIdWithTasks(Long id);
+
     Optional<Teacher> getByIdWithPersonAndPosition(Long id);
 
     Optional<Teacher> getByPersonIdWithPosition(Long personId);
