@@ -10,6 +10,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @Builder
 @AllArgsConstructor
@@ -35,4 +37,8 @@ public class CreateTaskRequestDTO {
     @NotNull(message = "complexity must be not null!")
     @NotBlank(message = "complexity must be not empty!")
     private String complexity;
+
+    @NotNull(message = "modelIds must be not null!")
+    @NotEmpty(message = "modelIds must be not empty!")
+    private List<Long> modelIds;
 }
