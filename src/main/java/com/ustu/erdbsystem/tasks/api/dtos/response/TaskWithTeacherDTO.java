@@ -6,12 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class TaskWithTeacherDTO {
-    private TaskDTO taskDTO;
+@SuperBuilder
+public class TaskWithTeacherDTO extends TaskDTO {
     private TeacherDTO teacherDTO;
 }
