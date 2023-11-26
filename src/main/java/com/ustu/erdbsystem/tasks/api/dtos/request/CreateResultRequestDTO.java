@@ -23,6 +23,10 @@ public class CreateResultRequestDTO {
     @Min(value = 1, message = "modelId cannot be less than 1!")
     private Long modelId;
 
+    @NotNull(message = "taskId must be not null!")
+    @Min(value = 1, message = "taskId cannot be less than 1!")
+    private Long taskId;
+
     @NotNull(message = "mark must be not null!")
     @Min(value = 2, message = "mark cannot be less than 2!")
     @Max(value = 5, message = "mark cannot be greater than 5!")
