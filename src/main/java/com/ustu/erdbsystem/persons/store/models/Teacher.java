@@ -49,6 +49,7 @@ public class Teacher {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @Builder.Default
     private List<Task> taskList = new ArrayList<>();
 
     public void addTask(Task task) {
@@ -62,6 +63,7 @@ public class Teacher {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @Builder.Default
     private List<Result> resultList = new ArrayList<>();
 
     public void addResult(Result result) {
