@@ -12,7 +12,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class DenormalizeModel {
+public class DenormalizeModelDTO {
     private Long id;
     private String view;
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "UTC")
