@@ -42,7 +42,6 @@ public class CreateModelRequestDTO {
     @Builder.Default
     private List<TableRequestDTO> tableList = new ArrayList<>();
 
-    @NotEmpty(message = "relationList must be not empty!")
     @Valid
     @Builder.Default
     private List<RelationRequestDTO> relationList = new ArrayList<>();
