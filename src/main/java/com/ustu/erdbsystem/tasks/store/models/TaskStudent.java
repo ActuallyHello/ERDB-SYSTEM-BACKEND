@@ -47,6 +47,16 @@ public class TaskStudent {
     @JoinColumn(name = "task_id")
     private Task task;
 
+    public void setStudent(Student student) {
+        this.student = student;
+        student.getTaskStudentList().add(this);
+    }
+
+    public void setTask(Task task) {
+        this.task = task;
+        task.getTaskStudentList().add(this);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

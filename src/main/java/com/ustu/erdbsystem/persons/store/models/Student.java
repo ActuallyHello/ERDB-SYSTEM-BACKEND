@@ -51,11 +51,6 @@ public class Student {
     @Builder.Default
     private List<TaskStudent> taskStudentList = new ArrayList<>();
 
-    public void addTaskStudent(TaskStudent taskStudent) {
-        this.taskStudentList.add(taskStudent);
-        taskStudent.setStudent(this);
-    }
-
     @OneToOne(
             cascade = CascadeType.ALL,
             fetch = FetchType.LAZY

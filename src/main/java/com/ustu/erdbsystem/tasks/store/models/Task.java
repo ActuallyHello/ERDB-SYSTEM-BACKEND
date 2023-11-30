@@ -15,6 +15,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -65,7 +66,13 @@ public class Task {
     private Teacher teacher;
 
     @OneToMany(mappedBy = "task")
+    @Builder.Default
     private List<TaskStudent> taskStudentList = new ArrayList<>();
+
+    public void addTaskStudent(TaskStudent taskStudent) {
+        this.taskStudentList.add(taskStudent);
+        taskStudent.setTask(this);
+    }
 
     @ManyToMany
     @JoinTable(
@@ -79,6 +86,15 @@ public class Task {
     public void addDenormalizeModel(DenormalizeModel denormalizeModel) {
         this.denormalizeModelList.add(denormalizeModel);
         denormalizeModel.getTaskList().add(this);
+    }
+
+    @OneToMany(mappedBy = "task")
+    @Builder.Default
+    private List<Result> resultList = new ArrayList<>();
+
+    public void addResult(Result result) {
+        this.resultList.add(result);
+        result.setTask(this);
     }
 
     @Override
