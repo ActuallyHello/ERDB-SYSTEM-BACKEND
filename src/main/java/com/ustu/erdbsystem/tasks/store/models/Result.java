@@ -58,6 +58,12 @@ public class Result {
     )
     private Teacher teacher;
 
+    @ManyToOne(
+            fetch = FetchType.EAGER,
+            optional = false
+    )
+    private Task task;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
