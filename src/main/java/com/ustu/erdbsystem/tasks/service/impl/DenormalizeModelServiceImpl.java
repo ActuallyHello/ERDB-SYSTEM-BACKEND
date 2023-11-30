@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -46,6 +47,13 @@ public class DenormalizeModelServiceImpl implements DenormalizeModelService {
             log.error("ERROR WHEN CREATING DENORMALIZE MODEL: {}", exception.getMessage());
             throw new DenormalizeModelCreationException("Error when creating denormalize model! [DatabaseException]", exception);
         }
+    }
+
+    @Override
+    public Optional<DenormalizeModel> getByModelIdWithTasks(Long modelId) {
+        var denormalizeModel = denormalizeModelRepo.findByModelIdWithTasks(modelId);
+        log.debug("GET DENORMALIZE MODEL WITH ID={}", modelId);
+        return denormalizeModel;
     }
 
     private String convertModelEntitiesToJsonString(List<ModelEntity> modelEntityList, Long modelId) {
