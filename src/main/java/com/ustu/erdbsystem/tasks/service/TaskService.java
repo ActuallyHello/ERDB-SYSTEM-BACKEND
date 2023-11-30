@@ -3,6 +3,7 @@ package com.ustu.erdbsystem.tasks.service;
 import com.ustu.erdbsystem.ermodels.store.models.Model;
 import com.ustu.erdbsystem.persons.store.models.Teacher;
 import com.ustu.erdbsystem.tasks.api.dtos.TaskDTO;
+import com.ustu.erdbsystem.tasks.api.dtos.TestDataDTO;
 import com.ustu.erdbsystem.tasks.store.models.DenormalizeModel;
 import com.ustu.erdbsystem.tasks.store.models.Task;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,4 +18,8 @@ public interface TaskService {
     Optional<Task> getByIdWithDenormalizeModel(Long id);
 
     Long create(TaskDTO taskDTO, Teacher teacher, List<DenormalizeModel> denormalizeModelList);
+
+    TestDataDTO generateDataForTask(Task task);
+
+    void deleteTask(Task task);
 }
