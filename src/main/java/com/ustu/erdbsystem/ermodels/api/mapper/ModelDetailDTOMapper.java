@@ -5,14 +5,15 @@ import com.ustu.erdbsystem.ermodels.api.dto.RelationDTO;
 import com.ustu.erdbsystem.ermodels.api.dto.response.ModelDetailDTO;
 import com.ustu.erdbsystem.ermodels.store.models.Model;
 import com.ustu.erdbsystem.persons.api.dto.PersonDTO;
+import lombok.NonNull;
 
 import java.util.List;
 
 public class ModelDetailDTOMapper {
-    public static ModelDetailDTO makeDTO(Model model,
-                                         PersonDTO personDTO,
-                                         List<ModelEntityDTO> modelEntityDTOList,
-                                         List<RelationDTO> relationDTOList) {
+    public static ModelDetailDTO makeDTO(@NonNull Model model,
+                                         @NonNull PersonDTO personDTO,
+                                         @NonNull List<ModelEntityDTO> modelEntityDTOList,
+                                         @NonNull List<RelationDTO> relationDTOList) {
         return ModelDetailDTO.builder()
                 .id(model.getId())
                 .title(model.getTitle())

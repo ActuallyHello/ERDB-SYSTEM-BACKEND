@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ustu.erdbsystem.external.TestDataLoader;
+import com.ustu.erdbsystem.persons.store.models.Student;
 import com.ustu.erdbsystem.persons.store.models.Teacher;
 import com.ustu.erdbsystem.tasks.api.dtos.TaskDTO;
 import com.ustu.erdbsystem.tasks.api.dtos.TestDataDTO;
@@ -15,6 +16,7 @@ import com.ustu.erdbsystem.tasks.service.TaskService;
 import com.ustu.erdbsystem.tasks.store.models.DenormalizeModel;
 import com.ustu.erdbsystem.tasks.store.models.Task;
 import com.ustu.erdbsystem.tasks.store.repos.TaskRepo;
+import com.ustu.erdbsystem.tasks.store.repos.TaskStudentRepo;
 import jakarta.persistence.PersistenceException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +40,13 @@ public class TaskServiceImpl implements TaskService {
     private final TestDataLoader testDataLoader;
 
     @Override
+    public Optional<Task> getById(Long id) {
+        var task = taskRepo.findById(id);
+        log.info("GET TASK WITH ID={}", id);
+        return task;
+    }
+
+    @Override
     public List<Task> getAllWithTeachers() {
         var tasks = taskRepo.findAllWithTeachers();
         log.info("GET TASKS ({})", tasks.size());
@@ -47,6 +56,13 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Optional<Task> getByIdWithDenormalizeModel(Long id) {
         var task = taskRepo.findByIdWithDenormalizeModel(id);
+        log.info("GET TASK WITH ID={}", id);
+        return task;
+    }
+
+    @Override
+    public Optional<Task> getByIdWithTaskStudentList(Long id) {
+        var task = taskRepo.findByIdWithTaskStudentList(id);
         log.info("GET TASK WITH ID={}", id);
         return task;
     }
@@ -101,6 +117,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public void deleteTask(Task task) {
         try {
             taskRepo.delete(task);

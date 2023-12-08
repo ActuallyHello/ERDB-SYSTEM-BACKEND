@@ -85,6 +85,7 @@ public class Model {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @Builder.Default
     private List<Result> resultList = new ArrayList<>();
 
     public void addResult(Result result) {

@@ -11,6 +11,7 @@ import com.ustu.erdbsystem.persons.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,7 +31,9 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("")
+    private static final String BY_ID = "/{id}";
+
+    @GetMapping
     public ResponseEntity<List<UserRestrictDTO>> getAllUsers() {
         var userList = userService.getAll().stream()
                 .map(UserRestrictDTOMapper::makeDTO)
@@ -38,7 +41,7 @@ public class UserController {
         return ResponseEntity.ok(userList);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(BY_ID)
     public ResponseEntity<UserRestrictDTO> getUserById(@PathVariable Long id) {
         var user = userService.getById(id)
                 .map(UserRestrictDTOMapper::makeDTO)
@@ -46,12 +49,12 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<Object> createUser(@RequestBody @Valid CreateUserRequestDTO createUserRequestDTO) {
         var userDTO = UserDTOMapper.makeDTO(createUserRequestDTO);
         try {
             var user = userService.create(userDTO);
-            return ResponseEntity.ok(Map.of("userId", user.getId()));
+            return new ResponseEntity<>(Map.of("userId", user.getId()), HttpStatus.CREATED);
         } catch (UserCreationException exception) {
             throw new UserServerException(exception.getMessage(), exception);
         }

@@ -43,7 +43,11 @@ public class StudentController {
     private final GroupService groupService;
     private final PersonService personService;
 
-    @GetMapping("/{id}")
+    private static final String BY_ID = "/{id}";
+    private static final String BY_PERSON_ID = "/persons/{personId}";
+    private static final String BY_GROUP_ID = "/groups/{groupId}";
+
+    @GetMapping(BY_ID)
     public ResponseEntity<StudentDTO> getStudentById(@PathVariable Long id) {
         var student = studentService.getByIdWithPersonAndGroup(id)
                 .orElseThrow(() -> new StudentNotFoundException("Student with id=%d was not found!".formatted(id)));
@@ -53,16 +57,16 @@ public class StudentController {
         return ResponseEntity.ok(studentDTO);
     }
 
-    @GetMapping("/by-person/{personId}")
+    @GetMapping(BY_PERSON_ID)
     public ResponseEntity<StudentWithGroupDTO> getStudentByPersonId(@PathVariable Long personId) {
-        var student = studentService.getByPersonIdWithGroup(personId)
+        var student = studentService.getByIdWithGroup(personId)
                 .orElseThrow(() -> new StudentNotFoundException("Student with related Person(id=%d) was not found!".formatted(personId)));
         var groupDTO = GroupDTOMapper.makeDTO(student.getGroup());
         var studentWithGroupDTO = StudentWithGroupDTOMapper.makeDTO(student, groupDTO);
         return ResponseEntity.ok(studentWithGroupDTO);
     }
 
-    @GetMapping("/by-group/{groupId}")
+    @GetMapping(BY_GROUP_ID)
     public ResponseEntity<List<StudentWithPersonDTO>> getStudentsByGroupId(@PathVariable Long groupId) {
         var studentDTOList = studentService.getAllByGroupIdWithPerson(groupId).stream()
                 .map(student -> StudentWithPersonDTOMapper.makeDTO(
@@ -73,7 +77,7 @@ public class StudentController {
         return ResponseEntity.ok(studentDTOList);
     }
 
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<Object> createStudent(@RequestBody @Valid CreateStudentRequestDTO createStudentRequestDTO) {
         var group = groupService.getById(createStudentRequestDTO.getGroupId())
                 .orElseThrow(() -> new GroupNotFoundException("Group with id=%d was not found!".formatted(createStudentRequestDTO.getGroupId())));
@@ -87,7 +91,7 @@ public class StudentController {
         }
     }
 
-    @DeleteMapping("/{Id}")
+    @DeleteMapping(BY_ID)
     public ResponseEntity<Object> deleteStudentById(@PathVariable Long id) {
         var student = studentService.getById(id)
                 .orElseThrow(() -> new StudentNotFoundException("Student with id=%d was not found!".formatted(id)));

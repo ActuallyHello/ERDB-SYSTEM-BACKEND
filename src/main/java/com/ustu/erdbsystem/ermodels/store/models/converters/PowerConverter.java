@@ -14,7 +14,7 @@ public class PowerConverter implements AttributeConverter<Power, String> {
         if (power == null) {
             return null;
         }
-        return power.getPower();
+        return power.getValue();
     }
 
     @Override
@@ -23,7 +23,7 @@ public class PowerConverter implements AttributeConverter<Power, String> {
             return null;
         }
         return Stream.of(Power.values())
-                .filter(at -> at.getPower().equals(power))
+                .filter(at -> at.getValue().equals(power))
                 .findFirst()
                 .orElseThrow(IllegalArgumentException::new);
     }

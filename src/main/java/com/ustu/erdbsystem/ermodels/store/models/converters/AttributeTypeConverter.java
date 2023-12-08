@@ -13,7 +13,7 @@ public class AttributeTypeConverter implements AttributeConverter<AttributeType,
         if (attributeType == null) {
             return null;
         }
-        return attributeType.getAttributeType();
+        return attributeType.getValue();
     }
 
     @Override
@@ -22,7 +22,7 @@ public class AttributeTypeConverter implements AttributeConverter<AttributeType,
             return null;
         }
         return Stream.of(AttributeType.values())
-                .filter(at -> at.getAttributeType().equals(attributeType))
+                .filter(at -> at.getValue().equals(attributeType))
                 .findFirst()
                 .orElseThrow(IllegalArgumentException::new);
     }

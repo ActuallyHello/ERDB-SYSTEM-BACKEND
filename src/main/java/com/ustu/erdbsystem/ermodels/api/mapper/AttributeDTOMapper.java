@@ -4,13 +4,13 @@ import com.ustu.erdbsystem.ermodels.api.dto.AttributeDTO;
 import com.ustu.erdbsystem.ermodels.api.dto.request.TableRequestDTO;
 import com.ustu.erdbsystem.ermodels.store.models.Attribute;
 import com.ustu.erdbsystem.ermodels.store.models.enums.AttributeType;
+import lombok.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AttributeDTOMapper {
-    public static AttributeDTO makeDTO(Attribute attribute) {
-        if (attribute == null) throw new IllegalArgumentException("attribute is null!");
+    public static AttributeDTO makeDTO(@NonNull Attribute attribute) {
         return AttributeDTO.builder()
                 .id(attribute.getId())
                 .title(attribute.getTitle())
@@ -18,8 +18,7 @@ public class AttributeDTOMapper {
                 .build();
     }
 
-    public static List<AttributeDTO> makeDTO(TableRequestDTO tableRequestDTO) {
-        if (tableRequestDTO == null) throw new IllegalArgumentException("tableRequestDTO is null!");
+    public static List<AttributeDTO> makeDTO(@NonNull TableRequestDTO tableRequestDTO) {
         List<AttributeDTO> attributeDTOList = new ArrayList<>();
         tableRequestDTO.getPkFields().forEach(attribute -> {
             attributeDTOList.add(AttributeDTO.builder()

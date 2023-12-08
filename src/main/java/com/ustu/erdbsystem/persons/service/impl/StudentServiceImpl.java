@@ -47,9 +47,9 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public Optional<Student> getByPersonIdWithGroup(Long personId) {
-        var student = studentRepo.findByPersonIdWithGroup(personId);
-        log.info("GET STUDENT BY PERSON WITH ID={}", personId);
+    public Optional<Student> getByIdWithGroup(Long id) {
+        var student = studentRepo.findByPersonIdWithGroup(id);
+        log.info("GET STUDENT BY PERSON WITH ID={}", id);
         return student;
     }
 

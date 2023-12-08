@@ -11,6 +11,7 @@ import com.ustu.erdbsystem.persons.service.GroupService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +33,9 @@ public class GroupController {
 
     private final GroupService groupService;
 
-    @GetMapping("")
+    private static final String BY_ID = "/{id}";
+
+    @GetMapping
     public ResponseEntity<List<GroupDTO>> getGroups() {
         var groupDTOList = groupService.getAll(true).stream()
                 .map(GroupDTOMapper::makeDTO)
@@ -40,7 +43,7 @@ public class GroupController {
         return ResponseEntity.ok(groupDTOList);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(BY_ID)
     public ResponseEntity<GroupDTO> getGroupById(@PathVariable Long id) {
         var groupDTO = groupService.getById(id)
                 .map(GroupDTOMapper::makeDTO)
@@ -48,18 +51,18 @@ public class GroupController {
         return ResponseEntity.ok(groupDTO);
     }
 
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<Object> createGroup(@RequestBody @Valid CreateGroupRequestDTO createGroupRequestDTO) {
         var groupDTO = GroupDTOMapper.makeDTO(createGroupRequestDTO);
         try {
             var group = groupService.create(groupDTO);
-            return ResponseEntity.ok(Map.of("groupId", group.getId()));
+            return new ResponseEntity<>(Map.of("groupId", group.getId()), HttpStatus.CREATED);
         } catch (GroupCreationException exception) {
             throw new GroupServerException(exception.getMessage(), exception);
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping(BY_ID)
     public ResponseEntity<Object> deleteGroupById(@PathVariable Long id) {
         var group = groupService.getById(id)
                 .orElseThrow(() -> new GroupNotFoundException("Group with id=%d was not found!".formatted(id)));
@@ -71,7 +74,7 @@ public class GroupController {
         }
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(BY_ID)
     public ResponseEntity<GroupDTO> updateGroupById(@PathVariable Long id,
                                                     @RequestBody @Valid CreateGroupRequestDTO createGroupRequestDTO) {
         var group = groupService.getById(id)

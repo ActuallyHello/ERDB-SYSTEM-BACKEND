@@ -21,6 +21,7 @@ import com.ustu.erdbsystem.persons.service.TeacherService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,7 +44,11 @@ public class TeacherController {
     private final PersonService personService;
     private final PositionService positionService;
 
-    @GetMapping("/{id}")
+    private static final String BY_ID = "/{id}";
+    private static final String BY_PERSON_ID = "/persons/{personId}";
+    private static final String BY_POSITION_ID = "/positions/{positionId}";
+
+    @GetMapping(BY_ID)
     public ResponseEntity<TeacherDTO> getTeacherById(@PathVariable Long id) {
         var teacher = teacherService.getByIdWithPersonAndPosition(id)
                 .orElseThrow(() -> new TeacherNotFoundException("Teacher with id=%d was not found!".formatted(id)));
@@ -53,7 +58,7 @@ public class TeacherController {
         return ResponseEntity.ok(teacherDTO);
     }
 
-    @GetMapping("/by-person/{personId}")
+    @GetMapping(BY_PERSON_ID)
     public ResponseEntity<TeacherWithPositionDTO> getTeacherByPersonId(@PathVariable Long personId) {
         var teacher = teacherService.getByPersonIdWithPosition(personId)
                 .orElseThrow(() -> new TeacherNotFoundException("Teacher with related Person(id=%d) was not found!".formatted(personId)));
@@ -62,7 +67,7 @@ public class TeacherController {
         return ResponseEntity.ok(teacherDTO);
     }
 
-    @GetMapping("/by-position/{positionId}")
+    @GetMapping(BY_POSITION_ID)
     public ResponseEntity<List<TeacherWithPersonDTO>> getTeachersByPositionId(@PathVariable Long positionId) {
         var teacherDTOList = teacherService.getAllByPositionId(positionId).stream()
                 .map(teacher -> TeacherWithPersonDTOMapper.makeDTO(
@@ -81,13 +86,13 @@ public class TeacherController {
                 .orElseThrow(() -> new PositionNotFoundException("Position with id=%d was not found!".formatted(createTeacherRequestDTO.getPositionId())));
         try {
             var teacher = teacherService.create(person, position);
-            return ResponseEntity.ok(Map.of("teacherId", teacher.getId()));
+            return new ResponseEntity<>(Map.of("teacherId", teacher.getId()), HttpStatus.CREATED);
         } catch (PositionCreationException exception) {
             throw new PositionServerException(exception.getMessage(), exception);
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping(BY_ID)
     public ResponseEntity<Object> deleteTeacherById(@PathVariable Long id) {
         var teacher = teacherService.getById(id)
                 .orElseThrow(() -> new TeacherNotFoundException("Teacher with id=%d was not found!".formatted(id)));

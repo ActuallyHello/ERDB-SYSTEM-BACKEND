@@ -1,6 +1,7 @@
 package com.ustu.erdbsystem.persons.service;
 
 import com.ustu.erdbsystem.persons.api.dto.PersonDTO;
+import com.ustu.erdbsystem.persons.api.dto.request.CreatePersonRequestDTO;
 import com.ustu.erdbsystem.persons.store.models.Person;
 import com.ustu.erdbsystem.persons.store.models.User;
 
@@ -21,5 +22,5 @@ public interface PersonService {
 
     void delete(Person person);
 
-    Person update(Person personNew);
+    Person update(Person person, User user, PersonDTO personDTO);
 }

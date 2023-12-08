@@ -3,7 +3,14 @@ package com.ustu.erdbsystem.ermodels.service.impl;
 import com.ustu.erdbsystem.ermodels.api.dto.ModelDTO;
 import com.ustu.erdbsystem.ermodels.api.dto.ModelEntityDTO;
 import com.ustu.erdbsystem.ermodels.api.dto.RelationDTO;
+import com.ustu.erdbsystem.ermodels.api.dto.response.ModelDetailDTO;
+import com.ustu.erdbsystem.ermodels.api.dto.response.ModelWithPersonDTO;
+import com.ustu.erdbsystem.ermodels.api.mapper.AttributeDTOMapper;
 import com.ustu.erdbsystem.ermodels.api.mapper.ModelDTOMapper;
+import com.ustu.erdbsystem.ermodels.api.mapper.ModelDetailDTOMapper;
+import com.ustu.erdbsystem.ermodels.api.mapper.ModelEntityDTOMapper;
+import com.ustu.erdbsystem.ermodels.api.mapper.ModelWithPersonDTOMapper;
+import com.ustu.erdbsystem.ermodels.api.mapper.RelationDTOMapper;
 import com.ustu.erdbsystem.ermodels.exception.service.ModelCreationException;
 import com.ustu.erdbsystem.ermodels.exception.service.ModelDeleteException;
 import com.ustu.erdbsystem.ermodels.exception.service.ModelEntityCreationException;
@@ -19,6 +26,7 @@ import com.ustu.erdbsystem.ermodels.store.models.ModelEntity;
 import com.ustu.erdbsystem.ermodels.store.models.enums.AttributeType;
 import com.ustu.erdbsystem.ermodels.store.repos.ModelEntityRepo;
 import com.ustu.erdbsystem.ermodels.store.repos.ModelRepo;
+import com.ustu.erdbsystem.persons.api.mapper.PersonDTOMapper;
 import com.ustu.erdbsystem.persons.store.models.Person;
 import jakarta.persistence.PersistenceException;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,25 +51,25 @@ public class ModelServiceImpl implements ModelService {
     private final ModelEntityAttributeService modelEntityAttributeService;
 
     @Override
-    public List<Model> getAllWithPerson() {
+    public List<Model> getAll() {
         var modelList = modelRepo.findAll();
         log.info("GET MODELS ({})", modelList.size());
         return modelList;
     }
 
     @Override
-    public List<Model> getAllWithPerson(List<Long> idList) {
-        var modelList = modelRepo.findAllById(idList);
-        log.info("GET MODELS ({})", modelList.size());
-        return modelList;
-    }
-
-    @Override
-    public List<Model> getAllWithPerson(int page, int size) {
+    public List<ModelWithPersonDTO> getAllModelsWithPersonDTO(Integer page, Integer size) {
+        page = page == null ? 0 : page;
+        size = size == null ? 20 : size;
         var pageable = PageRequest.of(page, size, Sort.by("id", "title"));
         var modelList = modelRepo.findAllBy(pageable);
         log.info("GET MODELS ({}) PAGE={} SIZE={}", modelList.size(), page, size);
-        return modelList;
+        return modelList.stream()
+                .map(model -> ModelWithPersonDTOMapper.makeDTO(
+                        model,
+                        PersonDTOMapper.makeDTO(model.getPerson())
+                ))
+                .toList();
     }
 
     @Override
@@ -69,6 +77,26 @@ public class ModelServiceImpl implements ModelService {
         var model = modelRepo.findById(id);
         log.info("GET MODEL WITH ID={}", id);
         return model;
+    }
+
+    @Override
+    public ModelDetailDTO getModelDetailDTOByModel(Model model) {
+        var personDTO = PersonDTOMapper.makeDTO(model.getPerson());
+        var modelEntityDTOList = modelEntityAttributeService.getAllByModel(model).stream()
+                .map(modelEntity -> {
+                    var attributeDTOList = modelEntity.getAttributeList().stream()
+                            .map(AttributeDTOMapper::makeDTO)
+                            .toList();
+                    return ModelEntityDTOMapper.makeDTO(modelEntity, attributeDTOList);
+                })
+                .toList();
+        var modelEntityIdList = modelEntityDTOList.stream()
+                .map(ModelEntityDTO::getId)
+                .toList();
+        var relationDTOList = relationService.getRelationsByEntityIds(modelEntityIdList).stream()
+                .map(RelationDTOMapper::makeDTO)
+                .toList();
+        return ModelDetailDTOMapper.makeDTO(model, personDTO, modelEntityDTOList, relationDTOList);
     }
 
     @Override
@@ -98,10 +126,10 @@ public class ModelServiceImpl implements ModelService {
 
     @Override
     @Transactional
-    public Model create(Person person,
-                        ModelDTO modelDTO,
+    public Model create(ModelDTO modelDTO,
                         List<ModelEntityDTO> modelEntityDTOList,
-                        List<RelationDTO> relationDTOList) {
+                        List<RelationDTO> relationDTOList,
+                        Person person) {
         var model = ModelDTOMapper.fromDTO(modelDTO);
         person.addModel(model);
         try {

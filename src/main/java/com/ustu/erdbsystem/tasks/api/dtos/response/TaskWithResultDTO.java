@@ -6,19 +6,15 @@ import com.ustu.erdbsystem.persons.api.dto.TeacherDTO;
 import com.ustu.erdbsystem.tasks.api.dtos.ResultDTO;
 import com.ustu.erdbsystem.tasks.api.dtos.TaskDTO;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class ResultWithTaskDTO {
-    private ResultDTO resultDTO;
-    private TaskDTO taskDTO;
-    private ModelDTO modelSourceDTO;
-    private ModelDTO modelResultDTO;
+@SuperBuilder
+public class TaskWithResultDTO extends TaskDTO  {
     private TeacherDTO teacherDTO;
-    private StudentDTO studentDTO;
+    private ResultDTO resultDTO;
 }

@@ -1,12 +1,16 @@
 package com.ustu.erdbsystem.persons.service.impl;
 
 import com.ustu.erdbsystem.persons.api.dto.PersonDTO;
+import com.ustu.erdbsystem.persons.api.dto.request.CreatePersonRequestDTO;
 import com.ustu.erdbsystem.persons.api.mapper.PersonDTOMapper;
+import com.ustu.erdbsystem.persons.exception.response.UserNotFoundException;
 import com.ustu.erdbsystem.persons.exception.service.PersonCreationException;
 import com.ustu.erdbsystem.persons.exception.service.PersonDeleteException;
 import com.ustu.erdbsystem.persons.service.PersonService;
+import com.ustu.erdbsystem.persons.service.UserService;
 import com.ustu.erdbsystem.persons.store.models.Person;
 import com.ustu.erdbsystem.persons.store.models.User;
+import com.ustu.erdbsystem.persons.store.models.enums.PersonType;
 import com.ustu.erdbsystem.persons.store.repos.PersonRepo;
 import jakarta.persistence.PersistenceException;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +21,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -86,9 +91,16 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     @Transactional
-    public Person update(Person personNew) {
+    public Person update(Person person, User user, PersonDTO personDTO) {
+        if (!Objects.equals(person.getUser().getId(), user.getId())) {
+            person.setUser(user);
+        }
+        person.setPersonType(personDTO.getPersonType());
+        person.setFirstName(personDTO.getFirstName());
+        person.setLastName(personDTO.getLastName());
+        person.setMiddleName(personDTO.getMiddleName());
         try {
-            var person = personRepo.saveAndFlush(personNew);
+            person = personRepo.saveAndFlush(person);
             log.info("PERSON WITH ID={} WAS UPDATED", person.getId());
             return person;
         } catch (DataIntegrityViolationException exception) {

@@ -13,9 +13,9 @@ public interface StudentService {
 
     Optional<Student> getById(Long id);
 
-    Optional<Student> getByIdWithPersonAndGroup(Long id);
+    Optional<Student> getByIdWithGroup(Long id);
 
-    Optional<Student> getByPersonIdWithGroup(Long personId);
+    Optional<Student> getByIdWithPersonAndGroup(Long id);
 
     Student create(Person person, Group group);
 

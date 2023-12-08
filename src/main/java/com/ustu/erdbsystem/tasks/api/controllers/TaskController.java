@@ -11,12 +11,13 @@ import com.ustu.erdbsystem.persons.api.mapper.PositionDTOMapper;
 import com.ustu.erdbsystem.persons.api.mapper.TeacherDTOMapper;
 import com.ustu.erdbsystem.persons.exception.response.TeacherNotFoundException;
 import com.ustu.erdbsystem.persons.service.TeacherService;
+import com.ustu.erdbsystem.tasks.api.dtos.TaskDTO;
 import com.ustu.erdbsystem.tasks.api.dtos.request.CreateTaskRequestDTO;
-import com.ustu.erdbsystem.tasks.api.dtos.response.TaskWithDenormalizeModelDTO;
 import com.ustu.erdbsystem.tasks.api.dtos.response.TaskWithTeacherDTO;
 import com.ustu.erdbsystem.tasks.api.dtos.response.TaskWithTestDataDTO;
 import com.ustu.erdbsystem.tasks.api.mapper.TaskDTOMapper;
 import com.ustu.erdbsystem.tasks.api.mapper.TaskWithTeacherDTOMapper;
+import com.ustu.erdbsystem.tasks.api.mapper.TaskWithTestDataDTOMapper;
 import com.ustu.erdbsystem.tasks.exception.response.TaskNotFoundException;
 import com.ustu.erdbsystem.tasks.exception.response.TaskServerException;
 import com.ustu.erdbsystem.tasks.exception.service.DenormalizeModelCreationException;
@@ -80,10 +81,7 @@ public class TaskController {
         var task = taskService.getByIdWithDenormalizeModel(id)
                 .orElseThrow(() -> new TaskNotFoundException("Task with id=%d was not found!".formatted(id)));
         var testDataDTO = taskService.generateDataForTask(task);
-        var taskWithTestDataDTO = TaskWithTestDataDTO.builder()
-                .taskDTO(TaskDTOMapper.makeDTO(task))
-                .testDataDTO(testDataDTO)
-                .build();
+        var taskWithTestDataDTO = TaskWithTestDataDTOMapper.makeDTO(task, testDataDTO);
         return ResponseEntity.ok(taskWithTestDataDTO);
     }
 

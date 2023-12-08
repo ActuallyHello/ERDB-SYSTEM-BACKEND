@@ -3,10 +3,11 @@ package com.ustu.erdbsystem.persons.api.mapper;
 import com.ustu.erdbsystem.persons.api.dto.UserDTO;
 import com.ustu.erdbsystem.persons.api.dto.request.CreateUserRequestDTO;
 import com.ustu.erdbsystem.persons.store.models.User;
+import lombok.NonNull;
 
 public class UserDTOMapper {
 
-    public static UserDTO makeDTO(User user) {
+    public static UserDTO makeDTO(@NonNull User user) {
         return UserDTO.builder()
                 .id(user.getId())
                 .login(user.getLogin())
@@ -16,7 +17,7 @@ public class UserDTOMapper {
                 .build();
     }
 
-    public static UserDTO makeDTO(CreateUserRequestDTO createUserRequestDTO) {
+    public static UserDTO makeDTO(@NonNull CreateUserRequestDTO createUserRequestDTO) {
         return UserDTO.builder()
                 .login(createUserRequestDTO.getLogin())
                 .email(createUserRequestDTO.getEmail())
@@ -24,7 +25,7 @@ public class UserDTOMapper {
                 .build();
     }
 
-    public static User fromDTO(UserDTO userDTO) {
+    public static User fromDTO(@NonNull UserDTO userDTO) {
         return User.builder()
                 .id(userDTO.getId())
                 .login(userDTO.getLogin())

@@ -25,11 +25,10 @@ public interface TaskRepo extends JpaRepository<Task, Long> {
             """)
     Optional<Task> findByIdWithDenormalizeModel(Long id);
 
-
     @Query("""
             select task from Task task
-                left join fetch task.resultList
+                left join fetch task.taskStudentList
             where task.id = :id
             """)
-    Optional<Task> findByIdWithResults(Long id);
+    Optional<Task> findByIdWithTaskStudentList(Long id);
 }

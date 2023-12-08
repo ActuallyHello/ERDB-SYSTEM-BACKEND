@@ -46,19 +46,19 @@ public class RelationServiceImpl implements RelationService {
                 if (fromEntity != null && toEntity != null) break;
             }
             if (fromEntity == null || toEntity == null) {
-                log.error("RELATION WITH fromEntity={} AND toEntity={} DOES NOT MATCH WITH ENTITIES!", relationDTO.getFromEntity(), relationDTO.getToEntity());
-                throw new RelationDoesNotMatchEntityException(
-                        "Relation with fromEntity=%s and toEntity=%s does not match with entities in table! [ValidationException]".formatted(
+                log.error("RELATION WITH fromEntity={} AND toEntity={} DOES NOT MATCH WITH ENTITIES!",
+                        relationDTO.getFromEntity(),
+                        relationDTO.getToEntity());
+                throw new RelationDoesNotMatchEntityException(("Relation with fromEntity=%s and toEntity=%s " +
+                        "does not match with entities in table! [ValidationException]").formatted(
                                 relationDTO.getFromEntity(), relationDTO.getToEntity()
-                        )
-                );
+                        ));
             }
             relationList.add(Relation.builder()
                     .modelEntity1(fromEntity)
                     .modelEntity2(toEntity)
                     .power(Power.fromString(relationDTO.getPower()))
-                    .build()
-            );
+                    .build());
         }
         try {
             relationRepo.saveAllAndFlush(relationList);

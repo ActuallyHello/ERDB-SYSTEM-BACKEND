@@ -65,14 +65,9 @@ public class Task {
     )
     private Teacher teacher;
 
-    @OneToMany(mappedBy = "task")
+    @OneToMany(mappedBy = "task", orphanRemoval = true)
     @Builder.Default
     private List<TaskStudent> taskStudentList = new ArrayList<>();
-
-    public void addTaskStudent(TaskStudent taskStudent) {
-        this.taskStudentList.add(taskStudent);
-        taskStudent.setTask(this);
-    }
 
     @ManyToMany
     @JoinTable(

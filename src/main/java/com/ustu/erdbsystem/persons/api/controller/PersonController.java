@@ -17,6 +17,7 @@ import com.ustu.erdbsystem.persons.store.models.enums.PersonType;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +41,9 @@ public class PersonController {
     private final PersonService personService;
     private final UserService userService;
 
-    @GetMapping("/")
+    private static final String BY_ID = "/{id}";
+
+    @GetMapping
     public ResponseEntity<List<PersonDTO>> getPersons() {
         var personList = personService.getAll().stream()
                 .map(PersonDTOMapper::makeDTO)
@@ -48,7 +51,7 @@ public class PersonController {
         return ResponseEntity.ok(personList);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(BY_ID)
     public ResponseEntity<PersonDTO> getPersonById(@PathVariable Long id) {
         var person = personService.getById(id)
                 .map(PersonDTOMapper::makeDTO)
@@ -56,30 +59,21 @@ public class PersonController {
         return ResponseEntity.ok(person);
     }
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<Object> createPerson(@RequestBody @Valid CreatePersonRequestDTO createPersonRequestDTO) {
         var user = userService.getById(createPersonRequestDTO.getUserId())
-                .orElseThrow(() -> new UserNotFoundException("User with id=%d was not found!".formatted(createPersonRequestDTO.getUserId())));
-
-        System.out.println(user);
-
-        PersonDTO personDTO;
-        try {
-            personDTO = PersonDTOMapper.makeDTO(createPersonRequestDTO);
-        } catch (EnumValueException exception) {
-            throw new PersonValidationException(exception.getMessage(), exception);
-        }
-        System.out.println(personDTO);
+                .orElseThrow(() -> new UserNotFoundException("User with id=%d was not found!".formatted(
+                        createPersonRequestDTO.getUserId())));
+        PersonDTO personDTO = PersonDTOMapper.makeDTO(createPersonRequestDTO);
         try {
             var person = personService.create(personDTO, user);
-            System.out.println(person);
-            return ResponseEntity.ok(Map.of("personId", person.getId()));
+            return new ResponseEntity<>(Map.of("personId", person.getId()), HttpStatus.CREATED);
         } catch (PersonCreationException exception) {
             throw new PersonServerException(exception.getMessage(), exception);
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping(BY_ID)
     public ResponseEntity<Object> deletePersonById(@PathVariable Long id) {
         var person = personService.getById(id)
                 .orElseThrow(() -> new PersonNotFoundException("Person with id=%d was not found!".formatted(id)));
@@ -91,31 +85,22 @@ public class PersonController {
         }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<PersonDTO> updatePersonById(@PathVariable Long id,
-                                                   @RequestBody @Valid CreatePersonRequestDTO createPersonRequestDTO) {
+    @PutMapping(BY_ID)
+    public ResponseEntity<PersonDTO> updatePersonById(
+            @PathVariable Long id,
+            @RequestBody @Valid CreatePersonRequestDTO createPersonRequestDTO) {
         var person = personService.getById(id)
                 .orElseThrow(() -> new PersonNotFoundException("Person with id=%d was not found!".formatted(id)));
-        if (!Objects.equals(person.getUser().getId(), createPersonRequestDTO.getUserId())) {
-            var user = userService.getById(createPersonRequestDTO.getUserId())
-                    .orElseThrow(() -> new UserNotFoundException("User with id=%d was not found!".formatted(createPersonRequestDTO.getUserId())));
-            person.setUser(user);
-        }
+        var user = userService.getById(createPersonRequestDTO.getUserId())
+                .orElseThrow(() -> new UserNotFoundException("User with id=%d was not found!".formatted(
+                        createPersonRequestDTO.getUserId())));
+        var personDTO = PersonDTOMapper.makeDTO(createPersonRequestDTO);
         try {
-            var personType = PersonType.fromString(createPersonRequestDTO.getPersonType());
-            person.setPersonType(personType);
-        } catch (EnumValueException exception) {
-            throw new PersonValidationException(exception.getMessage(), exception);
-        }
-        person.setFirstName(createPersonRequestDTO.getFirstName());
-        person.setLastName(createPersonRequestDTO.getLastName());
-        person.setMiddleName(createPersonRequestDTO.getMiddleName());
-        try {
-            person = personService.update(person);
-        } catch (PersonDeleteException exception) {
+            person = personService.update(person, user, personDTO);
+            return ResponseEntity.ok(PersonDTOMapper.makeDTO(person));
+        } catch (PersonCreationException exception) {
             throw new PersonServerException(exception.getMessage(), exception);
         }
-        var personDTO = PersonDTOMapper.makeDTO(person);
-        return ResponseEntity.ok(personDTO);
+
     }
 }

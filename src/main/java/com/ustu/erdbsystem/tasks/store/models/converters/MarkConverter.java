@@ -7,10 +7,10 @@ import jakarta.persistence.Converter;
 import java.util.stream.Stream;
 
 @Converter(autoApply = true)
-public class MarkConverter implements AttributeConverter<Mark, String> {
+public class MarkConverter implements AttributeConverter<Mark, Integer> {
 
     @Override
-    public String convertToDatabaseColumn(Mark mark) {
+    public Integer convertToDatabaseColumn(Mark mark) {
         if (mark == null) {
             return null;
         }
@@ -18,7 +18,7 @@ public class MarkConverter implements AttributeConverter<Mark, String> {
     }
 
     @Override
-    public Mark convertToEntityAttribute(String mark) {
+    public Mark convertToEntityAttribute(Integer mark) {
         if (mark == null) {
             return null;
         }

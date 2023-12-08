@@ -11,6 +11,7 @@ import com.ustu.erdbsystem.persons.service.PositionService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +32,9 @@ public class PositionController {
 
     private final PositionService positionService;
 
-    @GetMapping("")
+    private static final String BY_ID = "/{id}";
+
+    @GetMapping
     public ResponseEntity<List<PositionDTO>> getPositions() {
         var positionDTOList = positionService.getAll().stream()
                 .map(PositionDTOMapper::makeDTO)
@@ -39,18 +42,18 @@ public class PositionController {
         return ResponseEntity.ok(positionDTOList);
     }
 
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<Object> createPosition(@RequestBody @Valid CreatePositionRequestDTO createPositionRequestDTO) {
         var positionDTO = PositionDTOMapper.makeDTO(createPositionRequestDTO);
         try {
             var position = positionService.create(positionDTO);
-            return ResponseEntity.ok(Map.of("positionId", position.getId()));
+            return new ResponseEntity<>(Map.of("positionId", position.getId()), HttpStatus.CREATED);
         } catch (PositionCreationException exception) {
             throw new PositionServerException(exception.getMessage(), exception);
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping(BY_ID)
     public ResponseEntity<Object> deletePositionById(@PathVariable Long id) {
         var position = positionService.getById(id)
                 .orElseThrow(() -> new PositionNotFoundException("Position with id=%d was not found!".formatted(id)));
