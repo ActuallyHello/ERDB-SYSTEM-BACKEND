@@ -25,7 +25,6 @@ public class ModelDTOMapper {
                 .title(createModelRequestDTO.getTitle())
                 .description(createModelRequestDTO.getDescription())
                 .topic(createModelRequestDTO.getTopic())
-                .isTaskResult(createModelRequestDTO.getIsTaskResult())
                 .build();
     }
 

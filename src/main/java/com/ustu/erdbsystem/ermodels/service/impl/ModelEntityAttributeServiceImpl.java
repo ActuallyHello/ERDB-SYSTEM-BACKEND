@@ -54,7 +54,7 @@ public class ModelEntityAttributeServiceImpl implements ModelEntityAttributeServ
     @Override
     public List<ModelEntity> getAllByModel(Model model) {
         var modelEntityList = modelEntityRepo.getAllByModel(model);
-        log.info("GET ENTITIES ({})", modelEntityList.size());
+        log.debug("GET ENTITIES ({})", modelEntityList.size());
         return modelEntityList;
     }
 }
