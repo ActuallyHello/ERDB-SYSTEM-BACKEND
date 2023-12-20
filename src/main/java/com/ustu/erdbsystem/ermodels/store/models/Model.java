@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.Fetch;
@@ -67,12 +68,6 @@ public class Model {
     @Builder.Default
     private List<ModelEntity> modelEntityList = new ArrayList<>();
 
-    public void addModelEntity(ModelEntity modelEntity) {
-        if (modelEntity == null) throw new IllegalArgumentException("ModelEntity is null!");
-        this.modelEntityList.add(modelEntity);
-        modelEntity.setModel(this);
-    }
-
     @ManyToOne(
             fetch = FetchType.EAGER,
             optional = false
@@ -88,10 +83,9 @@ public class Model {
     @Builder.Default
     private List<Result> resultList = new ArrayList<>();
 
-    public void addResult(Result result) {
-        if (result == null) throw new IllegalArgumentException("Result is null!");
-        this.resultList.add(result);
-        result.setModel(this);
+    public void addModelEntity(@NonNull ModelEntity modelEntity) {
+        this.modelEntityList.add(modelEntity);
+        modelEntity.setModel(this);
     }
 
     @Override
