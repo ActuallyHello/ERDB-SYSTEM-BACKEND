@@ -15,11 +15,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -36,8 +38,9 @@ public class GroupController {
     private static final String BY_ID = "/{id}";
 
     @GetMapping
-    public ResponseEntity<List<GroupDTO>> getGroups() {
-        var groupDTOList = groupService.getAll(true).stream()
+    public ResponseEntity<List<GroupDTO>> getGroups(@RequestParam(required = false) Boolean isActive) {
+        if (isActive == null) isActive = true;
+        var groupDTOList = groupService.getAll(isActive).stream()
                 .map(GroupDTOMapper::makeDTO)
                 .toList();
         return ResponseEntity.ok(groupDTOList);
@@ -56,7 +59,7 @@ public class GroupController {
         var groupDTO = GroupDTOMapper.makeDTO(createGroupRequestDTO);
         try {
             var group = groupService.create(groupDTO);
-            return new ResponseEntity<>(Map.of("groupId", group.getId()), HttpStatus.CREATED);
+            return new ResponseEntity<>(Map.of("id", group.getId()), HttpStatus.CREATED);
         } catch (GroupCreationException exception) {
             throw new GroupServerException(exception.getMessage(), exception);
         }
@@ -74,7 +77,7 @@ public class GroupController {
         }
     }
 
-    @PutMapping(BY_ID)
+    @PatchMapping(BY_ID)
     public ResponseEntity<GroupDTO> updateGroupById(@PathVariable Long id,
                                                     @RequestBody @Valid CreateGroupRequestDTO createGroupRequestDTO) {
         var group = groupService.getById(id)
@@ -82,10 +85,9 @@ public class GroupController {
         group.setTitle(createGroupRequestDTO.getTitle());
         try {
             group = groupService.update(group);
+            return ResponseEntity.ok(GroupDTOMapper.makeDTO(group));
         } catch (GroupDeleteException exception) {
             throw new GroupServerException(exception.getMessage(), exception);
         }
-        var groupDTO = GroupDTOMapper.makeDTO(group);
-        return ResponseEntity.ok(groupDTO);
     }
 }
