@@ -14,5 +14,6 @@ public class UserDTO {
     private String login;
     private String email;
     private String password;
-    private Boolean isActive;
+    @Builder.Default
+    private Boolean isActive = true;
 }

@@ -53,14 +53,15 @@ public class StudentController {
                 .orElseThrow(() -> new StudentNotFoundException("Student with id=%d was not found!".formatted(id)));
         var groupDTO = GroupDTOMapper.makeDTO(student.getGroup());
         var personDTO = PersonDTOMapper.makeDTO(student.getPerson());
-        var studentDTO = StudentDTOMapper.makeDTO(groupDTO, personDTO);
+        var studentDTO = StudentDTOMapper.makeDTO(student, groupDTO, personDTO);
         return ResponseEntity.ok(studentDTO);
     }
 
     @GetMapping(BY_PERSON_ID)
     public ResponseEntity<StudentWithGroupDTO> getStudentByPersonId(@PathVariable Long personId) {
-        var student = studentService.getByIdWithGroup(personId)
-                .orElseThrow(() -> new StudentNotFoundException("Student with related Person(id=%d) was not found!".formatted(personId)));
+        var student = studentService.getByPersonIdWithGroup(personId)
+                .orElseThrow(() -> new StudentNotFoundException(
+                        "Student with related Person(id=%d) was not found!".formatted(personId)));
         var groupDTO = GroupDTOMapper.makeDTO(student.getGroup());
         var studentWithGroupDTO = StudentWithGroupDTOMapper.makeDTO(student, groupDTO);
         return ResponseEntity.ok(studentWithGroupDTO);
@@ -68,7 +69,8 @@ public class StudentController {
 
     @GetMapping(BY_GROUP_ID)
     public ResponseEntity<List<StudentWithPersonDTO>> getStudentsByGroupId(@PathVariable Long groupId) {
-        var studentDTOList = studentService.getAllByGroupIdWithPerson(groupId).stream()
+        var studentDTOList = studentService.getAllByGroupIdWithPerson(groupId)
+                .stream()
                 .map(student -> StudentWithPersonDTOMapper.makeDTO(
                         student,
                         PersonDTOMapper.makeDTO(student.getPerson()))
@@ -79,13 +81,15 @@ public class StudentController {
 
     @PostMapping
     public ResponseEntity<Object> createStudent(@RequestBody @Valid CreateStudentRequestDTO createStudentRequestDTO) {
-        var group = groupService.getById(createStudentRequestDTO.getGroupId())
-                .orElseThrow(() -> new GroupNotFoundException("Group with id=%d was not found!".formatted(createStudentRequestDTO.getGroupId())));
+        var group = groupService.getByIdWithStudents(createStudentRequestDTO.getGroupId())
+                .orElseThrow(() -> new GroupNotFoundException(
+                        "Group with id=%d was not found!".formatted(createStudentRequestDTO.getGroupId())));
         var person = personService.getById(createStudentRequestDTO.getPersonId())
-                .orElseThrow(() -> new PersonNotFoundException("Person with id=%d was not found!".formatted(createStudentRequestDTO.getPersonId())));
+                .orElseThrow(() -> new PersonNotFoundException(
+                        "Person with id=%d was not found!".formatted(createStudentRequestDTO.getPersonId())));
         try {
             var student = studentService.create(person, group);
-            return ResponseEntity.ok(Map.of("studentId", student.getId()));
+            return ResponseEntity.ok(Map.of("id", student.getId()));
         } catch (StudentCreationException exception) {
             throw new StudentServerException(exception.getMessage(), exception);
         }

@@ -3,7 +3,6 @@ package com.ustu.erdbsystem.tasks.api.dtos;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ustu.erdbsystem.tasks.store.models.enums.Complexity;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;

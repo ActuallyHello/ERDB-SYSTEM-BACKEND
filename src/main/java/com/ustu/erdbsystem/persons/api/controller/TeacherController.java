@@ -37,7 +37,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Slf4j
 @RestController
-@RequestMapping("/teaches")
+@RequestMapping("/teachers")
 public class TeacherController {
 
     private final TeacherService teacherService;
@@ -61,7 +61,8 @@ public class TeacherController {
     @GetMapping(BY_PERSON_ID)
     public ResponseEntity<TeacherWithPositionDTO> getTeacherByPersonId(@PathVariable Long personId) {
         var teacher = teacherService.getByPersonIdWithPosition(personId)
-                .orElseThrow(() -> new TeacherNotFoundException("Teacher with related Person(id=%d) was not found!".formatted(personId)));
+                .orElseThrow(() -> new TeacherNotFoundException(
+                        "Teacher with related Person(id=%d) was not found!".formatted(personId)));
         var positionDTO = PositionDTOMapper.makeDTO(teacher.getPosition());
         var teacherDTO = TeacherWithPositionDTOMapper.makeDTO(teacher, positionDTO);
         return ResponseEntity.ok(teacherDTO);
@@ -81,12 +82,14 @@ public class TeacherController {
     @PostMapping
     public ResponseEntity<Object> createTeacher(@RequestBody @Valid CreateTeacherRequestDTO createTeacherRequestDTO) {
         var person = personService.getById(createTeacherRequestDTO.getPersonId())
-                .orElseThrow(() -> new PersonNotFoundException("Person with id=%d was not found!".formatted(createTeacherRequestDTO.getPersonId())));
-        var position = positionService.getById(createTeacherRequestDTO.getPositionId())
-                .orElseThrow(() -> new PositionNotFoundException("Position with id=%d was not found!".formatted(createTeacherRequestDTO.getPositionId())));
+                .orElseThrow(() -> new PersonNotFoundException(
+                        "Person with id=%d was not found!".formatted(createTeacherRequestDTO.getPersonId())));
+        var position = positionService.getByIdWithTeachers(createTeacherRequestDTO.getPositionId())
+                .orElseThrow(() -> new PositionNotFoundException(
+                        "Position with id=%d was not found!".formatted(createTeacherRequestDTO.getPositionId())));
         try {
             var teacher = teacherService.create(person, position);
-            return new ResponseEntity<>(Map.of("teacherId", teacher.getId()), HttpStatus.CREATED);
+            return new ResponseEntity<>(Map.of("id", teacher.getId()), HttpStatus.CREATED);
         } catch (PositionCreationException exception) {
             throw new PositionServerException(exception.getMessage(), exception);
         }

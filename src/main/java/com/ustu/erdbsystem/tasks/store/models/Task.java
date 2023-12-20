@@ -78,18 +78,13 @@ public class Task {
     @Builder.Default
     private List<DenormalizeModel> denormalizeModelList = new ArrayList<>();
 
-    public void addDenormalizeModel(DenormalizeModel denormalizeModel) {
-        this.denormalizeModelList.add(denormalizeModel);
-        denormalizeModel.getTaskList().add(this);
-    }
-
     @OneToMany(mappedBy = "task")
     @Builder.Default
     private List<Result> resultList = new ArrayList<>();
 
-    public void addResult(Result result) {
-        this.resultList.add(result);
-        result.setTask(this);
+    public void addDenormalizeModel(DenormalizeModel denormalizeModel) {
+        this.denormalizeModelList.add(denormalizeModel);
+        denormalizeModel.getTaskList().add(this);
     }
 
     @Override

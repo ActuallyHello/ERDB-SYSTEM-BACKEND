@@ -1,7 +1,5 @@
 package com.ustu.erdbsystem.tasks.api.dtos.response;
 
-import com.ustu.erdbsystem.ermodels.api.dto.ModelDTO;
-import com.ustu.erdbsystem.persons.api.dto.StudentDTO;
 import com.ustu.erdbsystem.persons.api.dto.TeacherDTO;
 import com.ustu.erdbsystem.tasks.api.dtos.ResultDTO;
 import com.ustu.erdbsystem.tasks.api.dtos.TaskDTO;

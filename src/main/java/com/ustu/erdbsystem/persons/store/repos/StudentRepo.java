@@ -14,26 +14,33 @@ import java.util.Optional;
 public interface StudentRepo extends JpaRepository<Student, Long> {
 
     @Query("""
-            SELECT s FROM Student s
-                INNER JOIN FETCH s.group
-                INNER JOIN s.person p
-            WHERE p.id = :personId
+            select student from Student student
+                inner join fetch student.group
+                inner join student.person person
+            where person.id = :personId
             """)
     Optional<Student> findByPersonIdWithGroup(Long personId);
 
     @Query("""
-            SELECT s FROM Student s
-                INNER JOIN FETCH s.person
-                INNER JOIN s.group g
-            WHERE g.id = :groupId
+            select student from Student student
+                inner join fetch student.person
+                inner join student.group group
+            where group.id = :groupId
             """)
     List<Student> findAllByGroupIdWithPerson(Long groupId);
 
     @Query("""
-            SELECT s FROM Student s
-                INNER JOIN FETCH s.person
-                INNER JOIN FETCH s.group
-            WHERE s.id = :id
+            select student from Student student
+                inner join fetch student.person
+                inner join fetch student.group
+            where student.id = :id
             """)
     Optional<Student> findByIdWithPersonAndGroup(Long id);
+
+    @Query("""
+            select student from Student student
+                left join fetch student.taskStudentList
+            where student.id = :id
+            """)
+    Optional<Student> findByIdWithTaskList(Long id);
 }

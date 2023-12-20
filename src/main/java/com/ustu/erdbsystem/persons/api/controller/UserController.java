@@ -54,7 +54,7 @@ public class UserController {
         var userDTO = UserDTOMapper.makeDTO(createUserRequestDTO);
         try {
             var user = userService.create(userDTO);
-            return new ResponseEntity<>(Map.of("userId", user.getId()), HttpStatus.CREATED);
+            return new ResponseEntity<>(Map.of("id", user.getId()), HttpStatus.CREATED);
         } catch (UserCreationException exception) {
             throw new UserServerException(exception.getMessage(), exception);
         }

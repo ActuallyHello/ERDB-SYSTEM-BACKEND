@@ -8,9 +8,11 @@ import lombok.NonNull;
 
 public class StudentDTOMapper {
 
-    public static StudentDTO makeDTO(@NonNull GroupDTO groupDTO,
+    public static StudentDTO makeDTO(@NonNull Student student,
+                                     @NonNull GroupDTO groupDTO,
                                      @NonNull PersonDTO personDTO) {
         return StudentDTO.builder()
+                .id(student.getId())
                 .groupDTO(groupDTO)
                 .personDTO(personDTO)
                 .build();

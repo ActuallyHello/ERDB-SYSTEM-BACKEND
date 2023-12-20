@@ -1,5 +1,11 @@
 package com.ustu.erdbsystem.persons.service.impl;
 
+import com.ustu.erdbsystem.persons.api.dto.PersonDTO;
+import com.ustu.erdbsystem.persons.api.dto.StudentDTO;
+import com.ustu.erdbsystem.persons.api.mapper.GroupDTOMapper;
+import com.ustu.erdbsystem.persons.api.mapper.PersonDTOMapper;
+import com.ustu.erdbsystem.persons.api.mapper.StudentDTOMapper;
+import com.ustu.erdbsystem.persons.exception.response.StudentNotFoundException;
 import com.ustu.erdbsystem.persons.exception.service.StudentCreationException;
 import com.ustu.erdbsystem.persons.exception.service.StudentDeleteException;
 import com.ustu.erdbsystem.persons.service.StudentService;
@@ -28,29 +34,40 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public List<Student> getAllByGroupIdWithPerson(Long groupId) {
         var studentList = studentRepo.findAllByGroupIdWithPerson(groupId);
-        log.info("GET STUDENTS BY GROUP WITH ID={} ({})", groupId, studentList.size());
+        log.debug("GET STUDENTS BY GROUP WITH ID={} ({})", groupId, studentList.size());
         return studentList;
     }
 
     @Override
     public Optional<Student> getById(Long id) {
         var student = studentRepo.findById(id);
-        log.info("GET STUDENT WITH ID={}", id);
+        log.debug("GET STUDENT WITH ID={}", id);
         return student;
     }
 
     @Override
     public Optional<Student> getByIdWithPersonAndGroup(Long id) {
         var student = studentRepo.findByIdWithPersonAndGroup(id);
-        log.info("GET STUDENT WITH ID={}", id);
+        log.debug("GET STUDENT WITH ID={}", id);
         return student;
     }
 
     @Override
-    public Optional<Student> getByIdWithGroup(Long id) {
-        var student = studentRepo.findByPersonIdWithGroup(id);
-        log.info("GET STUDENT BY PERSON WITH ID={}", id);
+    public Optional<Student> getByPersonIdWithGroup(Long personId) {
+        var student = studentRepo.findByPersonIdWithGroup(personId);
+        log.debug("GET STUDENT BY PERSON WITH ID={}", personId);
         return student;
+    }
+
+    @Override
+    public StudentDTO getStudentDTOByPerson(Person person) {
+        var student = studentRepo.findByPersonIdWithGroup(person.getId());
+        log.debug("GET STUDENT BY PERSON WITH ID={}", person.getId());
+        return student.map(s -> StudentDTOMapper.makeDTO(
+                s,
+                GroupDTOMapper.makeDTO(s.getGroup()),
+                PersonDTOMapper.makeDTO(person))
+        ).orElse(null);
     }
 
     @Override
@@ -94,5 +111,12 @@ public class StudentServiceImpl implements StudentService {
             log.error("ERROR WHEN UPDATING STUDENT: {}", exception.getMessage());
             throw new StudentCreationException("Error when updating student! [DatabaseException]", exception);
         }
+    }
+
+    @Override
+    public Optional<Student> getByIdWithTaskStudentList(Long id) {
+        var student = studentRepo.findByIdWithTaskList(id);
+        log.debug("GET STUDENT WITH ID={}", id);
+        return student;
     }
 }

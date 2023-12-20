@@ -28,14 +28,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getAll() {
         List<User> userList = userRepo.findAll();
-        log.info("GET USERS ({})", userList.size());
+        log.debug("GET USERS ({})", userList.size());
         return userList;
     }
 
     @Override
     public Optional<User> getById(Long id) {
         Optional<User> user = userRepo.findById(id);
-        log.info("GET USER WITH ID={}", id);
+        log.debug("GET USER WITH ID={}", id);
         return user;
     }
 
