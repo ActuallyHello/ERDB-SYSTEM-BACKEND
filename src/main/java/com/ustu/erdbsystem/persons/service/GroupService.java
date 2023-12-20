@@ -13,6 +13,8 @@ public interface GroupService {
 
     Optional<Group> getById(Long id);
 
+    Optional<Group> getByIdWithStudents(Long id);
+
     Group create(GroupDTO groupDTO);
 
     void delete(Group group);

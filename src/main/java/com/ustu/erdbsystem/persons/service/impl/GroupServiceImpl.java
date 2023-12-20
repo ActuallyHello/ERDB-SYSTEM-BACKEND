@@ -28,21 +28,28 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public List<Group> getAll() {
         var groupList = groupRepo.findAll();
-        log.info("GET GROUPS ({})", groupList.size());
+        log.debug("GET GROUPS ({})", groupList.size());
         return groupList;
     }
 
     @Override
     public List<Group> getAll(Boolean isActive) {
         var groupList = groupRepo.findByIsActive(isActive);
-        log.info("GET GROUPS BY ACTIVE={} ({})", isActive, groupList.size());
+        log.debug("GET GROUPS BY ACTIVE={} ({})", isActive, groupList.size());
         return groupList;
     }
 
     @Override
     public Optional<Group> getById(Long id) {
         var group = groupRepo.findById(id);
-        log.info("GET GROUP WITH ID={}", id);
+        log.debug("GET GROUP WITH ID={}", id);
+        return group;
+    }
+
+    @Override
+    public Optional<Group> getByIdWithStudents(Long id) {
+        var group = groupRepo.findByIdWithStudents(id);
+        log.debug("GET GROUP WITH ID={}", id);
         return group;
     }
 
