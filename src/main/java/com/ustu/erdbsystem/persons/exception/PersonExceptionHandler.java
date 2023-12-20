@@ -62,15 +62,14 @@ public class PersonExceptionHandler {
                     TeacherServerException.class,
             }
     )
-    public ResponseEntity<Object> handleServerException(
-            ServerException serverException) {
+    public ResponseEntity<Object> handleServerException(ServerException serverException) {
         var personException = new ExceptionDTO(
                 serverException.getMessage(),
                 serverException.getClass().getSimpleName(),
-                HttpStatus.BAD_REQUEST,
-                HttpStatus.BAD_REQUEST.value()
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                HttpStatus.INTERNAL_SERVER_ERROR.value()
         );
-        return new ResponseEntity<>(personException, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(personException, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(
