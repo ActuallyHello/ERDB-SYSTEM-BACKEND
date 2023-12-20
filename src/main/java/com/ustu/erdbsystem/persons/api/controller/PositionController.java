@@ -47,7 +47,7 @@ public class PositionController {
         var positionDTO = PositionDTOMapper.makeDTO(createPositionRequestDTO);
         try {
             var position = positionService.create(positionDTO);
-            return new ResponseEntity<>(Map.of("positionId", position.getId()), HttpStatus.CREATED);
+            return new ResponseEntity<>(Map.of("id", position.getId()), HttpStatus.CREATED);
         } catch (PositionCreationException exception) {
             throw new PositionServerException(exception.getMessage(), exception);
         }
