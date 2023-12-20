@@ -16,10 +16,6 @@ import lombok.NoArgsConstructor;
 public class UpdateResultRequestDTO {
     @NotNull(message = "teacherId must be not null!")
     @Min(value = 1, message = "teacherId cannot be less than 1!")
-    private Long resultId;
-
-    @NotNull(message = "teacherId must be not null!")
-    @Min(value = 1, message = "teacherId cannot be less than 1!")
     private Long teacherId;
 
     @NotNull(message = "mark must be not null!")

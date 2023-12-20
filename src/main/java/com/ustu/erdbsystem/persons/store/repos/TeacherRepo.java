@@ -14,33 +14,40 @@ public interface TeacherRepo extends JpaRepository<Teacher, Long> {
     Optional<Teacher> findByPerson(Person person);
 
     @Query("""
-            SELECT t FROM Teacher t
-                INNER JOIN FETCH t.person
-                INNER JOIN FETCH t.position
-            WHERE t.id = :id
+            SELECT teacher FROM Teacher teacher
+                INNER JOIN FETCH teacher.person
+                INNER JOIN FETCH teacher.position
+            WHERE teacher.id = :id
             """)
     Optional<Teacher> findByIdWithPersonAndPosition(Long id);
 
     @Query("""
-            SELECT t FROM Teacher t
-                INNER JOIN FETCH t.position
-                INNER JOIN t.person pers
-            WHERE pers.id = :personId
+            SELECT teacher FROM Teacher teacher
+                INNER JOIN FETCH teacher.position
+                INNER JOIN teacher.person person
+            WHERE person.id = :personId
             """)
     Optional<Teacher> findByPersonIdWithPosition(Long personId);
 
     @Query("""
-            SELECT t FROM Teacher t
-                INNER JOIN FETCH t.person
-                INNER JOIN t.position pos
-            WHERE pos.id = :positionId
+            SELECT teacher FROM Teacher teacher
+                INNER JOIN FETCH teacher.person
+                INNER JOIN teacher.position position
+            WHERE position.id = :positionId
             """)
     List<Teacher> findAllByPositionIdWithPerson(Long positionId);
 
     @Query("""
-            SELECT t FROM Teacher t
-                LEFT JOIN FETCH t.taskList
-            WHERE t.id = :id
+            SELECT teacher FROM Teacher teacher
+                LEFT JOIN FETCH teacher.taskList
+            WHERE teacher.id = :id
             """)
     Optional<Teacher> findByIdWithTasks(Long id);
+
+    @Query("""
+            SELECT teacher FROM Teacher teacher
+                LEFT JOIN FETCH teacher.resultList
+            WHERE teacher.id = :id
+            """)
+    Optional<Teacher> findByIdWithResults(Long id);
 }

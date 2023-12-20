@@ -1,5 +1,9 @@
 package com.ustu.erdbsystem.persons.service.impl;
 
+import com.ustu.erdbsystem.persons.api.dto.TeacherDTO;
+import com.ustu.erdbsystem.persons.api.mapper.PersonDTOMapper;
+import com.ustu.erdbsystem.persons.api.mapper.PositionDTOMapper;
+import com.ustu.erdbsystem.persons.api.mapper.TeacherDTOMapper;
 import com.ustu.erdbsystem.persons.exception.service.TeacherCreationException;
 import com.ustu.erdbsystem.persons.exception.service.TeacherDeleteException;
 import com.ustu.erdbsystem.persons.service.TeacherService;
@@ -26,51 +30,69 @@ public class TeacherServiceImpl implements TeacherService {
     private TeacherRepo teacherRepo;
 
     @Override
+    public TeacherDTO getTeacherDTOByPerson(Person person) {
+        var teacher = teacherRepo.findByPersonIdWithPosition(person.getId());
+        log.debug("GET TEACHER BY PERSON WITH ID={}", person.getId());
+        return teacher.map(t -> TeacherDTOMapper.makeDTO(
+                t,
+                PersonDTOMapper.makeDTO(person),
+                PositionDTOMapper.makeDTO(t.getPosition()))
+        ).orElse(null);
+    }
+
+    @Override
     public List<Teacher> getAll() {
         var teacherList = teacherRepo.findAll();
-        log.info("GET TEACHER ({})", teacherList.size());
+        log.debug("GET TEACHER ({})", teacherList.size());
         return teacherList;
     }
 
     @Override
     public List<Teacher> getAllByPositionId(Long positionId) {
         var teacherList = teacherRepo.findAllByPositionIdWithPerson(positionId);
-        log.info("GET TEACHER BY POSITION WITH ID={} ({})", positionId, teacherList.size());
+        log.debug("GET TEACHER BY POSITION WITH ID={} ({})", positionId, teacherList.size());
         return teacherList;
     }
 
     @Override
     public Optional<Teacher> getById(Long id) {
         var teacher = teacherRepo.findById(id);
-        log.info("GET TEACHER WITH ID={}", id);
+        log.debug("GET TEACHER WITH ID={}", id);
+        return teacher;
+    }
+
+    @Override
+    public Optional<Teacher> getByIdWithResults(Long id) {
+        var teacher = teacherRepo.findByIdWithResults(id);
+        log.debug("GET TEACHER WITH ID={}", id);
         return teacher;
     }
 
     @Override
     public Optional<Teacher> getByIdWithTasks(Long id) {
         var teacher = teacherRepo.findByIdWithTasks(id);
-        log.info("GET TEACHER WITH ID={}", id);
+        log.debug("GET TEACHER WITH ID={}", id);
         return teacher;
     }
 
     @Override
     public Optional<Teacher> getByIdWithPersonAndPosition(Long id) {
         var teacher = teacherRepo.findByIdWithPersonAndPosition(id);
-        log.info("GET TEACHER WITH ID={}", id);
+        log.debug("GET TEACHER WITH ID={}", id);
         return teacher;
     }
 
     @Override
     public Optional<Teacher> getByPersonIdWithPosition(Long personId) {
         var teacher = teacherRepo.findByPersonIdWithPosition(personId);
-        log.info("GET TEACHER BY PERSON WITH ID={}", personId);
+        log.debug("GET TEACHER BY PERSON WITH ID={}", personId);
         return teacher;
     }
 
     @Override
     public Optional<Teacher> getByPerson(Person person) {
         var teacher = teacherRepo.findByPerson(person);
-        log.info("GET TEACHER BY PERSON WITH ID={}", person.getId());
+        log.debug("GET TEACHER BY PERSON WITH ID={}", person.getId());
         return teacher;
     }
 
