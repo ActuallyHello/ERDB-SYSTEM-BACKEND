@@ -96,7 +96,7 @@ public class RelationServiceImpl implements RelationService {
     @Override
     public List<Relation> getRelationsByEntityIds(List<Long> modelEntityIdList) {
         var relationList = relationRepo.findByModelEntity1IdOrModelEntity2IdInModelEntityIdList(modelEntityIdList);
-        log.info("GET RELATIONS ({})", relationList.size());
+        log.debug("GET RELATIONS ({})", relationList.size());
         return relationList;
     }
 }
