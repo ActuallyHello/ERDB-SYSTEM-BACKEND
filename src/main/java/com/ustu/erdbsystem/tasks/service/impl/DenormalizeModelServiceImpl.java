@@ -50,9 +50,9 @@ public class DenormalizeModelServiceImpl implements DenormalizeModelService {
     }
 
     @Override
-    public Optional<DenormalizeModel> getByModelIdWithTasks(Long modelId) {
-        var denormalizeModel = denormalizeModelRepo.findByModelIdWithTasks(modelId);
-        log.debug("GET DENORMALIZE MODEL WITH ID={}", modelId);
+    public Optional<DenormalizeModel> getByModelWithTasks(Model model) {
+        var denormalizeModel = denormalizeModelRepo.findByModelIdWithTasks(model);
+        log.debug("GET DENORMALIZE MODEL WITH ID={}", model.getId());
         return denormalizeModel;
     }
 
