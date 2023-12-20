@@ -35,29 +35,35 @@ public class PersonServiceImpl implements PersonService {
     @Override
     public List<Person> getAll() {
         var personList = personRepo.findAll();
-        log.info("GET PERSONS ({})", personList.size());
+        log.debug("GET PERSONS ({})", personList.size());
+        return personList;
+    }
+
+    @Override
+    public List<Person> getAllNotUsed() {
+        var personList = personRepo.findAllNotUsed();
+        log.debug("GET PERSONS ({})", personList.size());
         return personList;
     }
 
     @Override
     public Optional<Person> getById(Long id) {
         var person = personRepo.findById(id);
-        log.info("GET PERSON BY ID={}", id);
+        log.debug("GET PERSON BY ID={}", id);
         return person;
     }
 
     @Override
     public Optional<Person> getByIdWithModels(Long id) {
-        System.out.println();
         var person = personRepo.findByIdWithModels(id);
-        log.info("GET PERSON BY ID={}", id);
+        log.debug("GET PERSON BY ID={}", id);
         return person;
     }
 
     @Override
     public Optional<Person> getByUser(User user) {
         var person = personRepo.findByUser(user);
-        log.info("GET PERSON BY USER WITH ID={}", user.getId());
+        log.debug("GET PERSON BY USER WITH ID={}", user.getId());
         return person;
     }
 
@@ -108,4 +114,6 @@ public class PersonServiceImpl implements PersonService {
             throw new PersonCreationException("Error when updating person! [DatabaseException]", exception);
         }
     }
+
+
 }
