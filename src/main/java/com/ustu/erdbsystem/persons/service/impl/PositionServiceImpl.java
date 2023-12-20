@@ -28,19 +28,26 @@ public class PositionServiceImpl implements PositionService {
     @Override
     public List<Position> getAll() {
         var positionList = positionRepo.findAll();
-        log.info("GET POSITIONS ({})", positionList.size());
+        log.debug("GET POSITIONS ({})", positionList.size());
         return positionList;
     }
 
     @Override
     public Optional<Position> getById(Long id) {
         var position = positionRepo.findById(id);
-        log.info("GET POSITION WITH ID={}", id);
+        log.debug("GET POSITION WITH ID={}", id);
         return position;
     }
 
     @Override
+    public Optional<Position> getByIdWithTeachers(Long id) {
+        var position = positionRepo.findByIdWithTeachers(id);
+        log.debug("GET POSITION WITH ID={}", id);
+        return position;
+    }
 
+    @Override
+    @Transactional
     public Position create(PositionDTO positionDTO) {
         var position = PositionDTOMapper.fromDTO(positionDTO);
         try {

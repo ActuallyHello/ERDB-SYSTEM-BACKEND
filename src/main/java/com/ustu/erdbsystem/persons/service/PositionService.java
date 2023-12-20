@@ -10,6 +10,7 @@ public interface PositionService {
     List<Position> getAll();
 
     Optional<Position> getById(Long id);
+    Optional<Position> getByIdWithTeachers(Long id);
 
     Position create(PositionDTO positionDTO);
 
