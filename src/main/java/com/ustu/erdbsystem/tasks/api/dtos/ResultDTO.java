@@ -15,7 +15,7 @@ import java.time.Instant;
 @SuperBuilder
 public class ResultDTO {
     private Long id;
-    private Integer mark;
+    private Mark mark;
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "UTC")
     private Instant createdAt;
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "UTC")

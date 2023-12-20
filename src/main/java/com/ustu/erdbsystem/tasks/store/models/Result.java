@@ -53,30 +53,30 @@ public class Result {
     )
     private Model model;
 
-    public void setModel(Model model) {
-        this.model = model;
-        model.getResultList().add(this);
-    }
-
-    @ManyToOne(
-            fetch = FetchType.EAGER
-    )
-    private Teacher teacher;
-
-    public void setTeacher(Teacher teacher) {
-        this.teacher = teacher;
-        teacher.getResultList().add(this);
-    }
-
     @ManyToOne(
             fetch = FetchType.EAGER,
             optional = false
     )
     private Task task;
 
+    @ManyToOne(
+            fetch = FetchType.EAGER
+    )
+    private Teacher teacher;
+
+    public void setModel(Model model) {
+        this.model = model;
+        model.getResultList().add(this);
+    }
+
     public void setTask(Task task) {
         this.task = task;
         task.getResultList().add(this);
+    }
+
+    public void setTeacher(Teacher teacher) {
+        this.teacher = teacher;
+        teacher.getResultList().add(this);
     }
 
     @Override
