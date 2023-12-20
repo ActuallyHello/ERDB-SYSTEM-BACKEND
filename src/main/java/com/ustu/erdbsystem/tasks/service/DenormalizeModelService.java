@@ -10,5 +10,5 @@ public interface DenormalizeModelService {
 
     DenormalizeModel create(Model model);
 
-    Optional<DenormalizeModel> getByModelIdWithTasks(Long modelId);
+    Optional<DenormalizeModel> getByModelWithTasks(Model model);
 }
