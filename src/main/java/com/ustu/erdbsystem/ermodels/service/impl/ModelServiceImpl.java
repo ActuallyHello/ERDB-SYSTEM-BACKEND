@@ -4,12 +4,10 @@ import com.ustu.erdbsystem.ermodels.api.dto.ModelDTO;
 import com.ustu.erdbsystem.ermodels.api.dto.ModelEntityDTO;
 import com.ustu.erdbsystem.ermodels.api.dto.RelationDTO;
 import com.ustu.erdbsystem.ermodels.api.dto.response.ModelDetailDTO;
-import com.ustu.erdbsystem.ermodels.api.dto.response.ModelWithPersonDTO;
 import com.ustu.erdbsystem.ermodels.api.mapper.AttributeDTOMapper;
 import com.ustu.erdbsystem.ermodels.api.mapper.ModelDTOMapper;
 import com.ustu.erdbsystem.ermodels.api.mapper.ModelDetailDTOMapper;
 import com.ustu.erdbsystem.ermodels.api.mapper.ModelEntityDTOMapper;
-import com.ustu.erdbsystem.ermodels.api.mapper.ModelWithPersonDTOMapper;
 import com.ustu.erdbsystem.ermodels.api.mapper.RelationDTOMapper;
 import com.ustu.erdbsystem.ermodels.exception.service.ModelCreationException;
 import com.ustu.erdbsystem.ermodels.exception.service.ModelDeleteException;
@@ -20,14 +18,13 @@ import com.ustu.erdbsystem.ermodels.exception.validation.RelationDoesNotMatchEnt
 import com.ustu.erdbsystem.ermodels.service.ModelEntityAttributeService;
 import com.ustu.erdbsystem.ermodels.service.ModelService;
 import com.ustu.erdbsystem.ermodels.service.RelationService;
-import com.ustu.erdbsystem.ermodels.store.models.Attribute;
 import com.ustu.erdbsystem.ermodels.store.models.Model;
-import com.ustu.erdbsystem.ermodels.store.models.ModelEntity;
-import com.ustu.erdbsystem.ermodels.store.models.enums.AttributeType;
-import com.ustu.erdbsystem.ermodels.store.repos.ModelEntityRepo;
 import com.ustu.erdbsystem.ermodels.store.repos.ModelRepo;
 import com.ustu.erdbsystem.persons.api.mapper.PersonDTOMapper;
+import com.ustu.erdbsystem.persons.service.StudentService;
+import com.ustu.erdbsystem.persons.service.TeacherService;
 import com.ustu.erdbsystem.persons.store.models.Person;
+import com.ustu.erdbsystem.persons.store.models.enums.PersonType;
 import jakarta.persistence.PersistenceException;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
@@ -37,6 +34,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,31 +49,22 @@ public class ModelServiceImpl implements ModelService {
     private final ModelEntityAttributeService modelEntityAttributeService;
 
     @Override
-    public List<Model> getAll() {
-        var modelList = modelRepo.findAll();
-        log.info("GET MODELS ({})", modelList.size());
-        return modelList;
-    }
-
-    @Override
-    public List<ModelWithPersonDTO> getAllModelsWithPersonDTO(Integer page, Integer size) {
-        page = page == null ? 0 : page;
-        size = size == null ? 20 : size;
+    public List<Model> getAll(Integer page, Integer size, Boolean includeStudents, Boolean includeTaskResults) {
         var pageable = PageRequest.of(page, size, Sort.by("id", "title"));
-        var modelList = modelRepo.findAllBy(pageable);
-        log.info("GET MODELS ({}) PAGE={} SIZE={}", modelList.size(), page, size);
-        return modelList.stream()
-                .map(model -> ModelWithPersonDTOMapper.makeDTO(
-                        model,
-                        PersonDTOMapper.makeDTO(model.getPerson())
-                ))
-                .toList();
+        List<Model> modelList;
+        if (includeStudents) {
+            modelList = modelRepo.findAllByIsTaskResult(includeTaskResults, pageable);
+        } else {
+            modelList = modelRepo.findAllByTeachers(pageable);
+        }
+        log.debug("GET MODELS ({}) PAGE={} SIZE={}", modelList.size(), page, size);
+        return modelList;
     }
 
     @Override
     public Optional<Model> getById(Long id) {
         var model = modelRepo.findById(id);
-        log.info("GET MODEL WITH ID={}", id);
+        log.debug("GET MODEL WITH ID={}", id);
         return model;
     }
 
@@ -88,8 +77,7 @@ public class ModelServiceImpl implements ModelService {
                             .map(AttributeDTOMapper::makeDTO)
                             .toList();
                     return ModelEntityDTOMapper.makeDTO(modelEntity, attributeDTOList);
-                })
-                .toList();
+                }).toList();
         var modelEntityIdList = modelEntityDTOList.stream()
                 .map(ModelEntityDTO::getId)
                 .toList();
@@ -102,7 +90,7 @@ public class ModelServiceImpl implements ModelService {
     @Override
     public List<Model> getAllByPerson(Person person) {
         var modelList = modelRepo.findAllByPerson(person);
-        log.info("GET MODELS ({}) BY PERSON WITH ID={}", modelList.size(), person.getId());
+        log.debug("GET MODELS ({}) BY PERSON WITH ID={}", modelList.size(), person.getId());
         return modelList;
     }
 
