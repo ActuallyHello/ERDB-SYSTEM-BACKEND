@@ -51,6 +51,14 @@ public class PersonController {
         return ResponseEntity.ok(personList);
     }
 
+    @GetMapping("/not-used")
+    public ResponseEntity<List<PersonDTO>> getPersonsNotUsed() {
+        var personList = personService.getAllNotUsed().stream()
+                .map(PersonDTOMapper::makeDTO)
+                .toList();
+        return ResponseEntity.ok(personList);
+    }
+
     @GetMapping(BY_ID)
     public ResponseEntity<PersonDTO> getPersonById(@PathVariable Long id) {
         var person = personService.getById(id)
@@ -67,7 +75,7 @@ public class PersonController {
         PersonDTO personDTO = PersonDTOMapper.makeDTO(createPersonRequestDTO);
         try {
             var person = personService.create(personDTO, user);
-            return new ResponseEntity<>(Map.of("personId", person.getId()), HttpStatus.CREATED);
+            return new ResponseEntity<>(Map.of("id", person.getId()), HttpStatus.CREATED);
         } catch (PersonCreationException exception) {
             throw new PersonServerException(exception.getMessage(), exception);
         }

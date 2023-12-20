@@ -5,12 +5,13 @@ import com.ustu.erdbsystem.persons.api.dto.request.CreatePersonRequestDTO;
 import com.ustu.erdbsystem.persons.store.models.Person;
 import com.ustu.erdbsystem.persons.store.models.User;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 public interface PersonService {
 
-    List<Person> getAll();
+    List<Person> getAllNotUsed();
 
     Optional<Person> getById(Long id);
 
@@ -23,4 +24,6 @@ public interface PersonService {
     void delete(Person person);
 
     Person update(Person person, User user, PersonDTO personDTO);
+
+    List<Person> getAll();
 }
