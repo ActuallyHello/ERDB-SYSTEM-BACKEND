@@ -52,7 +52,7 @@ public class Student {
     private List<TaskStudent> taskStudentList = new ArrayList<>();
 
     @OneToOne(
-            cascade = CascadeType.ALL,
+            cascade = CascadeType.MERGE,
             fetch = FetchType.LAZY
     )
     @JoinColumn(name = "person_id", referencedColumnName = "id")

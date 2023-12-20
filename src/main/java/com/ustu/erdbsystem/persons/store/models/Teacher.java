@@ -39,6 +39,7 @@ public class Teacher {
 
     @ManyToOne(
             fetch = FetchType.EAGER,
+            cascade = CascadeType.MERGE,
             optional = false
     )
     private Position position;
@@ -52,11 +53,6 @@ public class Teacher {
     @Builder.Default
     private List<Task> taskList = new ArrayList<>();
 
-    public void addTask(Task task) {
-        this.taskList.add(task);
-        task.setTeacher(this);
-    }
-
     @OneToMany(
             mappedBy = "teacher",
             fetch = FetchType.LAZY,
@@ -66,13 +62,18 @@ public class Teacher {
     @Builder.Default
     private List<Result> resultList = new ArrayList<>();
 
+    public void addTask(Task task) {
+        this.taskList.add(task);
+        task.setTeacher(this);
+    }
+
     public void addResult(Result result) {
         this.resultList.add(result);
         result.setTeacher(this);
     }
 
     @OneToOne(
-            cascade = CascadeType.ALL,
+            cascade = CascadeType.MERGE,
             fetch = FetchType.LAZY
     )
     @JoinColumn(name = "person_id", referencedColumnName = "id")
