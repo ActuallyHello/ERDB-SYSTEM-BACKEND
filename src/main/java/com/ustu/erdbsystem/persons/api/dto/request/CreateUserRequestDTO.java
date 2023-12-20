@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,8 +22,8 @@ public class CreateUserRequestDTO {
 
     @NotNull(message = "password must be not null!")
     @NotBlank(message = "password must be not empty!")
-    @Min(value = 5, message = "password must be more than 5 symbols")
-    @Max(value = 20, message = "password must be less than 20 symbols")
+    @Size(min = 5, message = "password must be more than 5 symbols")
+    @Size(max = 20, message = "password must be less than 20 symbols")
     private String password;
 
     @NotNull(message = "email must be not null!")
