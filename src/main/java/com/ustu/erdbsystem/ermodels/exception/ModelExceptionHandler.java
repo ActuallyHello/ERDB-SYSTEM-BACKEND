@@ -1,12 +1,13 @@
 package com.ustu.erdbsystem.ermodels.exception;
 
 import com.ustu.erdbsystem.ermodels.exception.response.ModelNotFoundException;
-import com.ustu.erdbsystem.ermodels.exception.response.ModelOwnerNotFoundException;
 import com.ustu.erdbsystem.ermodels.exception.response.ModelServerException;
 import com.ustu.erdbsystem.ermodels.exception.response.ModelValidationException;
 import com.ustu.erdbsystem.exceptions.ExceptionDTO;
 import com.ustu.erdbsystem.exceptions.NotFoundException;
 import com.ustu.erdbsystem.exceptions.ServerException;
+import com.ustu.erdbsystem.persons.exception.response.PersonNotFoundException;
+import com.ustu.erdbsystem.tasks.exception.response.TaskNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -24,7 +25,8 @@ public class ModelExceptionHandler {
     @ExceptionHandler(
             value = {
                     ModelNotFoundException.class,
-                    ModelOwnerNotFoundException.class
+                    PersonNotFoundException.class,
+                    TaskNotFoundException.class
             }
     )
     public ResponseEntity<Object> handleNotFoundException(NotFoundException notFoundException) {
@@ -47,10 +49,10 @@ public class ModelExceptionHandler {
         var modelException = new ExceptionDTO(
                 serverException.getMessage(),
                 serverException.getClass().getSimpleName(),
-                HttpStatus.BAD_REQUEST,
-                HttpStatus.BAD_REQUEST.value()
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                HttpStatus.INTERNAL_SERVER_ERROR.value()
         );
-        return new ResponseEntity<>(modelException, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(modelException, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(
