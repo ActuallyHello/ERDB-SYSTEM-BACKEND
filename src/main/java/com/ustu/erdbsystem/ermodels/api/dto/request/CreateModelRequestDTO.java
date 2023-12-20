@@ -34,9 +34,6 @@ public class CreateModelRequestDTO {
     @NotBlank(message = "topic must be not empty!")
     private String topic;
 
-    @Builder.Default
-    private Boolean isTaskResult = false;
-
     @NotEmpty(message = "tableList must be not empty!")
     @Valid
     @Builder.Default
