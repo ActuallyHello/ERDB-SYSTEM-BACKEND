@@ -1,17 +1,24 @@
 package com.ustu.erdbsystem.external.excel;
 
+import com.ustu.erdbsystem.ermodels.store.models.Model;
 import com.ustu.erdbsystem.external.TestDataLoader;
 import com.ustu.erdbsystem.external.exception.LoadTestDataException;
+import com.ustu.erdbsystem.external.exception.UploadTestDataException;
 import lombok.extern.slf4j.Slf4j;
 import org.dhatim.fastexcel.reader.Cell;
 import org.dhatim.fastexcel.reader.ReadableWorkbook;
 import org.dhatim.fastexcel.reader.Row;
 import org.dhatim.fastexcel.reader.Sheet;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -78,6 +85,41 @@ public class TestDataLoaderExcel implements TestDataLoader {
                     "Error when processing test data file %s!".formatted(modelTitle + EXCEL_EXTENSION),
                     exceptionIO
             );
+        }
+    }
+
+    @Override
+    public void uploadTestDataFileToModel(Model model, MultipartFile file) {
+        Path testDataFilePath = Paths.get(RUNTIME_FOLDER + model.getTitle() + EXCEL_EXTENSION);
+        checkIfFileAlreadyExists(testDataFilePath);
+        try {
+            byte[] bytes = file.getBytes();
+            Files.write(testDataFilePath, bytes);
+            log.info("File {} upload successfully to a model with id={}!", model.getTitle(), model.getId());
+        } catch (IOException exception) {
+            log.error("ERROR WHEN UPLOADING FILE TO A MODEL WITH ID={}: {}", model.getId(), exception.getMessage());
+            throw new UploadTestDataException(
+                    String.format("Error when uploading the file to a model with id=%d", model.getId()),
+                    exception
+            );
+        }
+    }
+
+    private void checkIfFileAlreadyExists(Path path) {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(RUNTIME_FOLDER))) {
+            for (Path f : stream) {
+                if (Files.isRegularFile(f)) {
+                    System.out.println(f + " " + path);
+                    System.out.println(f.getFileName() + " " + path.getFileName());
+                    if (f.getFileName().equals(path.getFileName())) {
+                        log.error("ERROR UPLOADING TEST DATA FILE! FILE WITH THIS NAME ALREADY EXISTS!");
+                        throw new UploadTestDataException("The file with this name already exists!");
+                    }
+                }
+            }
+        } catch (IOException exception) {
+            log.error("ERROR UPLOADING TEST DATA FILE! {}", exception.getMessage());
+            throw new UploadTestDataException("Error when uploading the file!", exception);
         }
     }
 }
