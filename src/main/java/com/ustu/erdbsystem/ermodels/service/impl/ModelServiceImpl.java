@@ -21,10 +21,7 @@ import com.ustu.erdbsystem.ermodels.service.RelationService;
 import com.ustu.erdbsystem.ermodels.store.models.Model;
 import com.ustu.erdbsystem.ermodels.store.repos.ModelRepo;
 import com.ustu.erdbsystem.persons.api.mapper.PersonDTOMapper;
-import com.ustu.erdbsystem.persons.service.StudentService;
-import com.ustu.erdbsystem.persons.service.TeacherService;
 import com.ustu.erdbsystem.persons.store.models.Person;
-import com.ustu.erdbsystem.persons.store.models.enums.PersonType;
 import jakarta.persistence.PersistenceException;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
@@ -34,7 +31,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -125,12 +121,12 @@ public class ModelServiceImpl implements ModelService {
             log.info("MODEL WITH ID={} WAS CREATED", model.getId());
             var modelEntityList = modelEntityAttributeService.createModelEntities(modelEntityDTOList, model);
             relationService.createEntitiesRelations(relationDTOList, modelEntityList);
+            return model;
         } catch (ModelEntityCreationException | RelationCreationException |
                  RelationDoesNotMatchEntityException | DataIntegrityViolationException |
                  PersistenceException exception) {
             log.error("ERROR WHEN CREATING MODEL! {}", exception.getMessage());
             throw new ModelCreationException("Error when creating model! [DatabaseException]", exception);
         }
-        return model;
     }
 }
