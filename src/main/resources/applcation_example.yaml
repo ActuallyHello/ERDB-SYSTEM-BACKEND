@@ -19,3 +19,7 @@ spring:
 logging:
   level:
     root: INFO
+
+jwt:
+  secret:
+  lifetime: 30m
