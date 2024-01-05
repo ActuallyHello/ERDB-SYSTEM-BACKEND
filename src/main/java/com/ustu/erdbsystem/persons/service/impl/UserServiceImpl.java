@@ -40,6 +40,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Optional<User> getByLogin(String login) {
+        var user = userRepo.findByLogin(login);
+        log.debug("GET USER BY LOGIN={}", log);
+        return user;
+    }
+
+    @Override
     @Transactional
     public User create(UserDTO userDTO) {
         var user = UserDTOMapper.fromDTO(userDTO);
