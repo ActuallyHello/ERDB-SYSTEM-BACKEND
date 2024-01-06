@@ -27,6 +27,8 @@ import com.ustu.erdbsystem.tasks.service.TaskStudentService;
 import com.ustu.erdbsystem.tasks.store.models.Task;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -59,7 +61,10 @@ public class TaskController {
     public ResponseEntity<List<TaskWithTeacherDTO>> getAllTasksWithTeachers(
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size) {
-        var taskWithTeacherDTOList = taskService.getAllTasksWithTeachersDTOList(page, size);
+        page = page == null ? 0 : page;
+        size = size == null ? 20 : size;
+        var pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        var taskWithTeacherDTOList = taskService.getAllTasksWithTeachersDTOList(pageable);
         return ResponseEntity.ok(taskWithTeacherDTOList);
     }
     @GetMapping(BY_ID)
@@ -79,13 +84,15 @@ public class TaskController {
     @GetMapping("/students/{studentId}")
     public ResponseEntity<List<TaskWithResultDTO>> getAllTasksForStudent(@PathVariable Long studentId) {
         var student = studentService.getByIdWithPersonAndGroup(studentId)
-                .orElseThrow(() -> new StudentNotFoundException("Student with id=%d was not found!".formatted(studentId)));
+                .orElseThrow(() -> new StudentNotFoundException(
+                        "Student with id=%d was not found!".formatted(studentId)));
         var taskWithResultDTOList = taskStudentService.getTasksWithResultsDTOByStudent(student);
         return ResponseEntity.ok(taskWithResultDTOList);
     }
 
     @PostMapping("/send")
-    public ResponseEntity<Object> sendTasksToStudents(@RequestBody @Valid SendTasksToStudentsDTO sendTasksToStudentsDTO) {
+    public ResponseEntity<Object> sendTasksToStudents(@RequestBody @Valid SendTasksToStudentsDTO sendTasksToStudentsDTO)
+    {
         var taskList = sendTasksToStudentsDTO.getTaskIds().stream()
                 .map(taskId -> taskService.getByIdWithTaskStudentList(taskId)
                         .orElseThrow(() -> new TaskNotFoundException(
@@ -104,7 +111,8 @@ public class TaskController {
     public ResponseEntity<Object> createTask(@RequestBody @Valid CreateTaskRequestDTO createTaskRequestDTO) {
         var taskDTO = TaskDTOMapper.makeDTO(createTaskRequestDTO);
         var teacher = teacherService.getByIdWithTasks(createTaskRequestDTO.getTeacherId())
-                .orElseThrow(() -> new TeacherNotFoundException("Teacher with id=%d was not found!".formatted(createTaskRequestDTO.getTeacherId())));
+                .orElseThrow(() -> new TeacherNotFoundException(
+                        "Teacher with id=%d was not found!".formatted(createTaskRequestDTO.getTeacherId())));
         var modelList = createTaskRequestDTO.getModelIds().stream()
                 .map(modelId -> modelService.getById(modelId)
                         .orElseThrow(() -> new ModelNotFoundException(

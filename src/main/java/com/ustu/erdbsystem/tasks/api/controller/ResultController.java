@@ -11,10 +11,14 @@ import com.ustu.erdbsystem.tasks.exception.response.ResultNotFoundException;
 import com.ustu.erdbsystem.tasks.exception.response.ResultServerException;
 import com.ustu.erdbsystem.tasks.exception.service.ResultCreationException;
 import com.ustu.erdbsystem.tasks.service.ResultService;
+import com.ustu.erdbsystem.tasks.service.facade.ResultFacade;
 import com.ustu.erdbsystem.tasks.store.models.enums.Mark;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -35,6 +39,8 @@ public class ResultController {
     private final ResultService resultService;
     private final TeacherService teacherService;
 
+    private final ResultFacade resultFacade;
+
     private static final String BY_ID = "/{id}";
 
     @GetMapping
@@ -42,7 +48,8 @@ public class ResultController {
                                                                        @RequestParam(required = false) Integer size) {
         page = page == null ? 0 : page;
         size = size == null ? 20 : size;
-        var resultWithTaskDTOList = resultService.getAllPreview(page, size);
+        var pageable = PageRequest.of(page, size, Sort.by("updatedAt").descending());
+        var resultWithTaskDTOList = resultFacade.getAllPreview(pageable);
         return ResponseEntity.ok(resultWithTaskDTOList);
     }
 
@@ -50,7 +57,7 @@ public class ResultController {
     public ResponseEntity<ResultWithModelDTO> getResultById(@PathVariable Long id) {
         var result = resultService.getByIdWithModelAndTaskAndTeacher(id)
                 .orElseThrow(() -> new ResultNotFoundException("Result with id=%d was not found".formatted(id)));
-        var resultWithModelDTO = resultService.getByIdToEvaluateResult(result);
+        var resultWithModelDTO = resultFacade.getByIdToEvaluateResult(result);
         return ResponseEntity.ok(resultWithModelDTO);
     }
 
