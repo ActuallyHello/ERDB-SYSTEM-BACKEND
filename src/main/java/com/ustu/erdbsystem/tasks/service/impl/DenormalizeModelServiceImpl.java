@@ -67,7 +67,7 @@ public class DenormalizeModelServiceImpl implements DenormalizeModelService {
                                         "type", attribute.getAttributeType().getValue()))
                                 .toList()));
         view = view.entrySet().stream()
-                .filter(entry -> entry.getValue().size() > 1)
+                .filter(entry -> entry.getValue().size() > 1) // if entity has more than one PK field after filter
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         ObjectMapper objectMapper = new ObjectMapper();
         try {
