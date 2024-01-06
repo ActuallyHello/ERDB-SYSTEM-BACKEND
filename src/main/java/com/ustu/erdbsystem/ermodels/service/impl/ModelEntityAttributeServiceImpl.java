@@ -27,7 +27,7 @@ public class ModelEntityAttributeServiceImpl implements ModelEntityAttributeServ
 
     @Override
     @Transactional
-    public List<ModelEntity> createModelEntities(List<ModelEntityDTO> modelEntityDTOList, Model model) {
+    public List<ModelEntity> createEntitiesWithAttributes(List<ModelEntityDTO> modelEntityDTOList, Model model) {
         for (var modelEntityDTO : modelEntityDTOList) {
             ModelEntity modelEntity = ModelEntity.builder()
                     .title(modelEntityDTO.getTitle())

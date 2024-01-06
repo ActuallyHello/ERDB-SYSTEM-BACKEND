@@ -28,6 +28,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,32 +43,13 @@ import java.util.Optional;
 public class ResultServiceImpl implements ResultService {
 
     private final ResultRepo resultRepo;
-    private final ModelService modelService;
-    private final StudentService studentService;
 
     @Override
-    public List<Result> getAllWithTaskAndModelAndTeacher(Integer page, Integer size) {
-        var pageable = PageRequest.of(page, size, Sort.by("updatedAt").descending());
+    public List<Result> getAllWithTaskAndModelAndTeacher(Pageable pageable) {
         var resultList = resultRepo.findAllWithTaskAndModelAndTeacher(pageable);
-        log.debug("GET RESULTS ({}) PAGE={} SIZE={}", resultList.size(), page, size);
+        log.debug("GET RESULTS ({}) PAGE={} SIZE={}", resultList.size(),
+                pageable.getPageNumber(), pageable.getPageSize());
         return resultList;
-    }
-
-    @Override
-    public List<ResultWithTaskDTO> getAllPreview(Integer page, Integer size) {
-        List<Result> resultList = getAllWithTaskAndModelAndTeacher(page, size);
-        return resultList.stream()
-                .map(result -> {
-                    TaskDTO taskDTO = TaskDTOMapper.makeDTO(result.getTask());
-                    Person authorResult = result.getModel().getPerson();
-                    StudentDTO studentDTO = studentService.getStudentDTOByPerson(authorResult);
-                    TeacherDTO teacherDTO = null;
-                    if (result.getTeacher() != null) {
-                        teacherDTO = TeacherDTOMapper.makeDTO(result.getTeacher(), PersonDTOMapper.makeDTO(result.getTeacher().getPerson()), PositionDTOMapper.makeDTO(result.getTeacher().getPosition()));
-                    }
-                    return ResultWithTaskDTOMapper.makeDTO(result, taskDTO, studentDTO, teacherDTO);
-                })
-                .toList();
     }
 
     @Override
@@ -75,32 +57,6 @@ public class ResultServiceImpl implements ResultService {
         var result = resultRepo.findById(id);
         log.debug("GET RESULT (ID={})", id);
         return result;
-    }
-
-    @Override
-    public ResultWithModelDTO getByIdToEvaluateResult(Result result) {
-        Model sourceModelFromTask = result.getTask()
-                .getDenormalizeModelList().get(0)
-                .getModel();
-        ModelDetailDTO sourceModelDetailDTO = modelService.getModelDetailDTOByModel(sourceModelFromTask);
-        Model resultModelFromStudent = result.getModel();
-        ModelDetailDTO resultModelDetailDTO = modelService.getModelDetailDTOByModel(resultModelFromStudent);
-        TaskDTO taskDTO = TaskDTOMapper.makeDTO(result.getTask());
-
-        Teacher teacher = result.getTeacher();
-        TeacherDTO teacherDTO = teacher != null
-                ? TeacherDTOMapper.makeDTO(
-                    teacher,
-                    PersonDTOMapper.makeDTO(teacher.getPerson()),
-                    PositionDTOMapper.makeDTO(teacher.getPosition())
-                )
-                : null;
-        return ResultWithModelDTOMapper.makeDTO(
-                result,
-                sourceModelDetailDTO,
-                resultModelDetailDTO,
-                taskDTO,
-                teacherDTO);
     }
 
     @Override

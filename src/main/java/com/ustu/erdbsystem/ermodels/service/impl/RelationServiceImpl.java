@@ -32,34 +32,7 @@ public class RelationServiceImpl implements RelationService {
     @Transactional
     public List<Relation> createEntitiesRelations(List<RelationDTO> relationDTOList,
                                                   List<ModelEntity> modelEntityList) {
-        List<Relation> relationList = new ArrayList<>();
-        for (var relationDTO : relationDTOList) {
-            ModelEntity fromEntity = null;
-            ModelEntity toEntity = null;
-            for (var modelEntity : modelEntityList) {
-                if (relationDTO.getFromEntity().equals(modelEntity.getTitle())) {
-                    fromEntity = modelEntity;
-                }
-                if (relationDTO.getToEntity().equals(modelEntity.getTitle())) {
-                    toEntity = modelEntity;
-                }
-                if (fromEntity != null && toEntity != null) break;
-            }
-            if (fromEntity == null || toEntity == null) {
-                log.error("RELATION WITH fromEntity={} AND toEntity={} DOES NOT MATCH WITH ENTITIES!",
-                        relationDTO.getFromEntity(),
-                        relationDTO.getToEntity());
-                throw new RelationDoesNotMatchEntityException(("Relation with fromEntity=%s and toEntity=%s " +
-                        "does not match with entities in table! [ValidationException]").formatted(
-                                relationDTO.getFromEntity(), relationDTO.getToEntity()
-                        ));
-            }
-            relationList.add(Relation.builder()
-                    .modelEntity1(fromEntity)
-                    .modelEntity2(toEntity)
-                    .power(Power.fromString(relationDTO.getPower()))
-                    .build());
-        }
+        var relationList = collectRelationsBetweenEntities(relationDTOList, modelEntityList);
         try {
             relationRepo.saveAllAndFlush(relationList);
             log.info("CREATED ENTITY RELATIONS ({})", relationList.size());
@@ -68,7 +41,39 @@ public class RelationServiceImpl implements RelationService {
             log.error("ERROR WHEN CREATING RELATIONS! {}", exception.getMessage());
             throw new RelationCreationException("Error when creating relations! [DatabaseException]", exception);
         }
+    }
 
+    private List<Relation> collectRelationsBetweenEntities(List<RelationDTO> relationDTOList,
+                                                           List<ModelEntity> modelEntityList) {
+        List<Relation> relationList = new ArrayList<>();
+        for (var relationDTO : relationDTOList) {
+            ModelEntity fromEntity = null;
+            ModelEntity toEntity = null;
+            for (var modelEntity : modelEntityList) {
+                if (fromEntity != null && toEntity != null) { break; }
+                if (relationDTO.getFromEntity().equals(modelEntity.getTitle())) {
+                    fromEntity = modelEntity;
+                }
+                if (relationDTO.getToEntity().equals(modelEntity.getTitle())) {
+                    toEntity = modelEntity;
+                }
+            }
+            if (fromEntity == null || toEntity == null) {
+                log.error("RELATION WITH table1={} AND table2={} DOES NOT MATCH WITH ENTITIES!",
+                        relationDTO.getFromEntity(),
+                        relationDTO.getToEntity());
+                throw new RelationDoesNotMatchEntityException(("Relation with table1=%s and table2=%s " +
+                        "does not match with entities in table! [ValidationException]").formatted(
+                        relationDTO.getFromEntity(), relationDTO.getToEntity()
+                ));
+            }
+            relationList.add(Relation.builder()
+                    .modelEntity1(fromEntity)
+                    .modelEntity2(toEntity)
+                    .power(Power.fromString(relationDTO.getPower()))
+                    .build());
+        }
+        return relationList;
     }
 
     @Override
@@ -81,21 +86,22 @@ public class RelationServiceImpl implements RelationService {
         }
         var relationList = this.getRelationsByEntityIds(modelEntityList.stream()
                 .map(ModelEntity::getId)
-                .toList()
-        );
+                .toList());
         try {
             relationRepo.deleteAll(relationList);
             relationRepo.flush();
             log.info("RELATIONS WERE DELETED FROM MODEL WITH ID={}", model.getId());
         } catch (DataIntegrityViolationException | PersistenceException exception) {
             log.error("ERROR WHEN DELETING RELATIONS FROM MODEL WITH ID={}! {}", model.getId(), exception.getMessage());
-            throw new RelationDeleteException("Error when deleting relations from model! [DatabaseException]", exception);
+            throw new RelationDeleteException(
+                    "Error when deleting relations from model! [DatabaseException]", exception);
         }
     }
 
     @Override
     public List<Relation> getRelationsByEntityIds(List<Long> modelEntityIdList) {
-        var relationList = relationRepo.findByModelEntity1IdOrModelEntity2IdInModelEntityIdList(modelEntityIdList);
+        var relationList =
+                relationRepo.findByModelEntity1IdOrModelEntity2IdInModelEntityIdList(modelEntityIdList);
         log.debug("GET RELATIONS ({})", relationList.size());
         return relationList;
     }

@@ -30,6 +30,7 @@ import com.ustu.erdbsystem.tasks.service.DenormalizeModelService;
 import com.ustu.erdbsystem.tasks.service.TaskService;
 import com.ustu.erdbsystem.tasks.store.models.DenormalizeModel;
 import com.ustu.erdbsystem.tasks.store.models.Task;
+import com.ustu.erdbsystem.tasks.store.models.enums.Complexity;
 import com.ustu.erdbsystem.tasks.store.repos.TaskRepo;
 import com.ustu.erdbsystem.tasks.store.repos.TaskStudentRepo;
 import jakarta.persistence.PersistenceException;
@@ -37,6 +38,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,10 +76,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskWithTeacherDTO> getAllTasksWithTeachersDTOList(Integer page, Integer size) {
-        page = page == null ? 0 : page;
-        size = size == null ? 20 : size;
-        var pageable = PageRequest.of(page, size, Sort.by("id").descending());
+    public List<TaskWithTeacherDTO> getAllTasksWithTeachersDTOList(Pageable pageable) {
         var taskWithTeacherList = taskRepo.findAllWithTeachers(pageable);
         log.debug("GET TASKS ({})", taskWithTeacherList.size());
         return taskWithTeacherList.stream()
@@ -114,10 +113,11 @@ public class TaskServiceImpl implements TaskService {
     public Long create(TaskDTO taskDTO, Teacher teacher, List<Model> modelList) {
         var task = TaskDTOMapper.fromDTO(taskDTO);
         for (var model : modelList) {
-            var denormalizeModel = denormalizeModelService.getByModelWithTasks(model).orElseGet(() -> {
-                model.setModelEntityList(modelEntityAttributeService.getAllByModel(model));
-                return denormalizeModelService.create(model);
-            });
+            var denormalizeModel = denormalizeModelService.getByModelWithTasks(model)
+                    .orElseGet(() -> {
+                        model.setModelEntityList(modelEntityAttributeService.getAllByModel(model)); // load entities
+                        return denormalizeModelService.create(model);
+                    });
             task.addDenormalizeModel(denormalizeModel);
         }
         teacher.addTask(task);
@@ -138,31 +138,52 @@ public class TaskServiceImpl implements TaskService {
             var mapView = getMapFromJsonView(denormalizeModel.getView());
             List<String> entities = new ArrayList<>();
             List<String> attributes = new ArrayList<>();
-            switch (task.getComplexity()) {
-                case EASY -> {
-                    mapView.forEach((key, value) -> {
-                        entities.add(key);
-                        attributes.addAll(value.stream().map(attributeMap -> attributeMap.get("title")).toList());
-                    });
-                }
-                case NORMAL -> {
-                    mapView.values().forEach(value -> attributes.addAll(value.stream().map(attributeMap -> attributeMap.get("title")).toList()));
-                }
-                case DIFFICULT -> {
-                    mapView.values().forEach(value -> attributes.addAll(
-                            value.stream()
-                                    .filter(attributeMap -> !attributeMap.get("type").equalsIgnoreCase("PK"))
-                                    .map(attributeMap -> attributeMap.get("title"))
-                                    .toList()));
-                }
-            }
-            List<List<String>> data = testDataLoader.loadData(denormalizeModel.getModel().getTitle(),
-                    attributes, task.getTestDataAmount());
+            collectEntitiesAndAttributesDependsOnComplexityFromView(
+                    mapView,
+                    task.getComplexity(),
+                    entities,
+                    attributes);
+            List<List<String>> data = testDataLoader.loadData(
+                    denormalizeModel.getModel().getTitle(),
+                    attributes,
+                    task.getTestDataAmount());
             testData.getEntities().addAll(entities);
             testData.getAttributes().addAll(attributes);
             testData.getTestData().addAll(data);
         }
         return testData;
+    }
+
+    private void collectEntitiesAndAttributesDependsOnComplexityFromView(Map<String, List<Map<String, String>>> mapView,
+                                                                         Complexity complexity,
+                                                                         List<String> entities,
+                                                                         List<String> attributes) {
+        switch (complexity) {
+            case EASY -> {
+                mapView.forEach((key, value) -> {
+                    entities.add(key);
+                    attributes.addAll(value.stream().map(attributeMap -> attributeMap.get("title")).toList());
+                });
+            }
+            case NORMAL -> {
+                mapView.values().forEach(value -> attributes.addAll(
+                        value.stream()
+                                .map(attributeMap -> attributeMap.get("title"))
+                                .toList()));
+            }
+            case DIFFICULT -> {
+                mapView.values().forEach(value -> attributes.addAll(
+                        value.stream()
+                                .filter(attributeMap -> !attributeMap.get("type").equalsIgnoreCase("PK"))
+                                .map(attributeMap -> attributeMap.get("title"))
+                                .toList()));
+            }
+            default -> {
+                log.error("NO SUCH COMPLEXITY={} TO GENERATE TEST DATA!", complexity);
+                throw new IllegalArgumentException("Error when generating test data for task! " +
+                        "Complexity with value=%s does not exist!".formatted(complexity.getComplexity()));
+            }
+        }
     }
 
     @Override
@@ -187,7 +208,7 @@ public class TaskServiceImpl implements TaskService {
 
     private Map<String, List<Map<String, String>>> getMapFromJsonView(String jsonView) {
         try {
-            return objectMapper.readValue(jsonView, new TypeReference<>(){});
+            return objectMapper.readValue(jsonView, new TypeReference<>() {});
         } catch (JsonProcessingException exception) {
             log.error("ERROR WHEN PARSING JSON FIELD FROM MODEL: {}", exception.getMessage());
             throw new ConvertEntityToJsonException("Error when parsing json field!", exception);

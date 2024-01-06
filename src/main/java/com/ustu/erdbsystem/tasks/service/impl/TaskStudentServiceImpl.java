@@ -74,7 +74,8 @@ public class TaskStudentServiceImpl implements TaskStudentService {
         } catch (DataIntegrityViolationException | PersistenceException exception) {
             log.error("ERROR WHEN CREATING TASK STUDENT TO SEND {} TASK(S) TO {} STUDENT(S): {}",
                     taskList.size(), studentList.size(), exception.getMessage());
-            throw new TaskStudentCreationException("Error when sending tasks for students! [DatabaseException]", exception);
+            throw new TaskStudentCreationException(
+                    "Error when sending tasks for students! [DatabaseException]", exception);
         }
     }
 }

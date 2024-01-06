@@ -10,19 +10,16 @@ import com.ustu.erdbsystem.tasks.api.dtos.response.ResultWithTaskDTO;
 import com.ustu.erdbsystem.tasks.store.models.Result;
 import com.ustu.erdbsystem.tasks.store.models.Task;
 import com.ustu.erdbsystem.tasks.store.models.enums.Mark;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ResultService {
 
-    List<Result> getAllWithTaskAndModelAndTeacher(Integer page, Integer size);
-
-    List<ResultWithTaskDTO> getAllPreview(Integer page, Integer size);
+    List<Result> getAllWithTaskAndModelAndTeacher(Pageable pageable);
 
     Optional<Result> getById(Long id);
-
-    ResultWithModelDTO getByIdToEvaluateResult(Result result);
 
     Optional<Result> getByIdWithModelAndTaskAndTeacher(Long id);
 

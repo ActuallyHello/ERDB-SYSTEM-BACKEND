@@ -8,7 +8,7 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 
 public interface ModelEntityAttributeService {
-    List<ModelEntity> createModelEntities(List<ModelEntityDTO> modelEntityDTO, Model model);
+    List<ModelEntity> createEntitiesWithAttributes(List<ModelEntityDTO> modelEntityDTO, Model model);
 
     List<ModelEntity> getAllByModel(Model model);
 }
